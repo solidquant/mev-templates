@@ -17,19 +17,19 @@ pub struct ArbPath {
 }
 
 impl ArbPath {
-    pub fn has_pool(self, pool: H160) -> bool {
+    pub fn has_pool(&self, pool: H160) -> bool {
         let is_pool_1 = self.pool_1.address == pool;
         let is_pool_2 = self.pool_2.address == pool;
         let is_pool_3 = self.pool_3.address == pool;
         return is_pool_1 || is_pool_2 || is_pool_3;
     }
 
-    pub fn should_blacklist(self, blacklist_tokens: Vec<H160>) -> bool {
+    pub fn should_blacklist(&self, blacklist_tokens: &Vec<H160>) -> bool {
         for i in 0..self.nhop {
             let pool = match i {
-                0 => Some(self.pool_1),
-                1 => Some(self.pool_2),
-                2 => Some(self.pool_3),
+                0 => Some(&self.pool_1),
+                1 => Some(&self.pool_2),
+                2 => Some(&self.pool_3),
                 _ => None,
             }
             .unwrap();

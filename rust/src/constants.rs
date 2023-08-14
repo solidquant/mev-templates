@@ -1,3 +1,10 @@
+use ethers::types::H160;
+use std::str::FromStr;
+
+pub fn get_env(key: &str) -> String {
+    std::env::var(key).unwrap()
+}
+
 #[derive(Debug, Clone)]
 pub struct Env {
     pub https_url: String,
@@ -10,11 +17,18 @@ pub struct Env {
 impl Env {
     pub fn new() -> Self {
         Env {
-            https_url: std::env::var("HTTPS_URL").unwrap(),
-            wss_url: std::env::var("WSS_URL").unwrap(),
-            private_key: std::env::var("PRIVATE_KEY").unwrap(),
-            signing_key: std::env::var("SIGNING_KEY").unwrap(),
-            bot_address: std::env::var("BOT_ADDRESS").unwrap(),
+            https_url: get_env("HTTPS_URL"),
+            wss_url: get_env("WSS_URL"),
+            private_key: get_env("PRIVATE_KEY"),
+            signing_key: get_env("SIGNING_KEY"),
+            bot_address: get_env("BOT_ADDRESS"),
         }
     }
+}
+
+pub fn get_blacklist_tokens() -> Vec<H160> {
+    vec!["0x9469603F3Efbcf17e4A5868d81C701BDbD222555"]
+        .into_iter()
+        .map(|addr| H160::from_str(addr).unwrap())
+        .collect()
 }
