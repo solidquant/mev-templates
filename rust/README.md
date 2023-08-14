@@ -1,1 +1,1 @@
-# # MEV template for Rustaceans
+# MEV template for Rustaceans
