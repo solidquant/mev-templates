@@ -1,0 +1,9 @@
+[profile.default]
+solc_version = '0.8.13'
+auto_detect_solc = false
+optimizer = true
+optimizer_runs = 200 # Default amount
+remappings = [
+  "forge-std/=lib/forge-std/src/",
+  "openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/",
+]
