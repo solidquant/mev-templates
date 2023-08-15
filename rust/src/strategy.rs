@@ -3,19 +3,15 @@ use ethers::{
     types::{H160, U256},
 };
 use log::info;
-use std::{collections::HashMap, path::Path, str::FromStr, sync::Arc};
-use tokio::sync::broadcast::{self, Sender};
-use tokio::task::JoinSet;
-use tokio_stream::StreamExt;
+use std::{collections::HashMap, str::FromStr, sync::Arc};
+use tokio::sync::broadcast::Sender;
 
-use crate::abi::ABI;
 use crate::constants::{get_blacklist_tokens, Env};
 use crate::multi::batch_get_uniswap_v2_reserves;
 use crate::paths::generate_triangular_paths;
 use crate::pools::{load_all_pools_from_v2, Pool};
-use crate::simulator::UniswapV2Simulator;
-use crate::streams::{stream_new_blocks, stream_pending_transactions, Event, NewBlock};
-use crate::utils::{get_touched_pool_reserves, setup_logger};
+use crate::streams::Event;
+use crate::utils::get_touched_pool_reserves;
 
 pub async fn event_handler(provider: Arc<Provider<Ws>>, event_sender: Sender<Event>) {
     let env = Env::new();

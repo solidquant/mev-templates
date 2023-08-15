@@ -89,7 +89,7 @@ class Bundler:
             **self._common_fields,
             'to': self.bot.address,
             'value': Web3.to_wei(amount_in, 'ether'),
-            'gas': 21000,
+            'gas': 60000,
             'maxFeePerGas': max_fee_per_gas,
             'maxPriorityFeePerGas': max_priority_fee_per_gas,
         }
@@ -123,7 +123,7 @@ class Bundler:
             router, tokens, force
         ).build_transaction({
             **self._common_fields,
-            'gas': 200000,
+            'gas': 55000 * len(tokens),
             'maxFeePerGas': max_fee_per_gas,
             'maxPriorityFeePerGas': max_priority_fee_per_gas,
         })

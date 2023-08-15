@@ -1,13 +1,11 @@
 use anyhow::Result;
 use ethers::{
     self,
-    abi::{decode, parse_abi, ParamType, Token},
-    prelude::BaseContract,
+    abi::{decode, ParamType, Token},
     providers::{Middleware, Provider, Ws},
-    types::{Filter, Transaction, H160, U256, U64},
+    types::{Filter, H160, U256, U64},
 };
 use fern::colors::{Color, ColoredLevelConfig};
-use log::info;
 use log::LevelFilter;
 use std::{collections::HashMap, sync::Arc};
 

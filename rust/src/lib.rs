@@ -1,4 +1,5 @@
 pub mod abi;
+pub mod bundler;
 pub mod constants;
 pub mod multi;
 pub mod paths;

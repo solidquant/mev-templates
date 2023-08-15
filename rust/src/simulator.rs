@@ -1,6 +1,4 @@
-use anyhow::Result;
 use ethers::types::U256;
-use serde::__private::de;
 
 pub struct UniswapV2Simulator;
 

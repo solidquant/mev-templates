@@ -1,4 +1,3 @@
-use anyhow::Result;
 use ethers::types::{H160, U256};
 use indicatif::{ProgressBar, ProgressStyle};
 use itertools::Itertools;

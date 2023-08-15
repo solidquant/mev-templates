@@ -1813,8 +1813,8 @@ dependencies = [
 
 [[package]]
 name = "ethers-flashbots"
-version = "0.13.1"
-source = "git+https://github.com/onbjerg/ethers-flashbots#db147d1f5b5e1904857cd76b9ce697b12a414fec"
+version = "0.14.0"
+source = "git+https://github.com/onbjerg/ethers-flashbots#fac6b1aa8374562e58bfdde827d5fd8bf7c5a422"
 dependencies = [
  "async-trait",
  "chrono",
@@ -4429,6 +4429,7 @@ version = "0.1.0"
 dependencies = [
  "anvil",
  "anyhow",
+ "bytes",
  "cfmms",
  "chrono",
  "colored 2.0.4",
