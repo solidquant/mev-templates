@@ -149,7 +149,7 @@ def load_all_pools_from_v2(https_url: str,
                             token1=args.token1,
                             decimals0=decimals0,
                             decimals1=decimals1,
-                            fee=3000)
+                            fee=300)
                 pools[args.pair] = pool
 
     cache_synced_pools(pools)

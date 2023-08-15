@@ -48,6 +48,23 @@ impl From<StringRecord> for Pool {
     }
 }
 
+impl Pool {
+    pub fn cache_row(&self) -> (String, i32, String, String, u8, u8, u32) {
+        (
+            format!("{:?}", self.address),
+            match self.version {
+                DexVariant::UniswapV2 => 2,
+                DexVariant::UniswapV3 => 3,
+            },
+            format!("{:?}", self.token0),
+            format!("{:?}", self.token1),
+            self.decimals0,
+            self.decimals1,
+            self.fee,
+        )
+    }
+}
+
 pub async fn load_all_pools_from_v2(
     wss_url: String,
     factory_addresses: Vec<&str>,
@@ -117,6 +134,22 @@ pub async fn load_all_pools_from_v2(
         })
         .collect();
     info!("Synced to {} pools", pools_vec.len());
+
+    let mut writer = csv::Writer::from_path(file_path)?;
+    writer.write_record(&[
+        "address",
+        "version",
+        "token0",
+        "token1",
+        "decimals0",
+        "decimals1",
+        "fee",
+    ])?;
+
+    for pool in &pools_vec {
+        writer.serialize(pool.cache_row())?;
+    }
+    writer.flush()?;
 
     Ok(pools_vec)
 }

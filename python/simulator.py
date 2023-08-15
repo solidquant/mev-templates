@@ -23,7 +23,7 @@ class UniswapV2Simulator:
                        amount_in: float,
                        reserve_in: float,
                        reserve_out: float,
-                       fee: float = 3000):
+                       fee: float = 300):
         """
         Fee in Uniswap V2 variants are 0.3%
         However, for variants that have different fee rates,
@@ -33,7 +33,7 @@ class UniswapV2Simulator:
         that is saved into storage_array from dex.DEX class for consistency
         with Uniswap V3 variant pools
         """
-        fee = fee // 1000
+        fee = fee // 100
         amount_in_with_fee = amount_in * (1000 - fee)
         numerator = amount_in_with_fee * reserve_out
         denominator = (reserve_in * 1000) + amount_in_with_fee
@@ -43,9 +43,8 @@ class UniswapV2Simulator:
                       amount_out: float,
                       reserve_in: float,
                       reserve_out: float,
-                      fee: float = 3000):
-
-        fee = fee // 1000
+                      fee: float = 300):
+        fee = fee // 100
         numerator = reserve_in * amount_out * 1000
         denominator = (reserve_out - amount_out) * (1000 - fee)
         return int(numerator / denominator + 1)
