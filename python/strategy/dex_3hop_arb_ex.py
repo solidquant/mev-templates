@@ -166,7 +166,7 @@ async def event_handler(event_queue: aioprocessing.AioQueue):
                 print('\n')
 
 
-def run_strategy():
+def main():
     """
     A sample MEV code of triangular arbitrage on Sushiswap V2 Polygon
     """
@@ -189,4 +189,4 @@ def run_strategy():
     
 
 if __name__ == '__main__':
-    run_strategy()
+    main()

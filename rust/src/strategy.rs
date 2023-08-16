@@ -137,6 +137,7 @@ pub async fn event_handler(provider: Arc<Provider<Ws>>, event_sender: Sender<Eve
 
                         info!("Excess profit: {:?}", excess_profit);
 
+                        // TODO
                         if excess_profit > 0 {}
                     }
                 }

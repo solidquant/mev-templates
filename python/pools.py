@@ -106,10 +106,6 @@ def load_all_pools_from_v2(https_url: str,
         
         v2_factory = w3.eth.contract(address=factory_address, abi=v2_factory_abi)
 
-        def _request_pair_created_events(_from_block: int, _to_block: int):
-            events = v2_factory.events.PairCreated.get_logs(fromBlock=_from_block, toBlock=_to_block)
-            return events
-
         block_range = list(range(from_block, to_block, chunk))
         request_params = [(block_range[i], block_range[i + 1]) for i in range(len(block_range) - 1)]
 
@@ -119,7 +115,7 @@ def load_all_pools_from_v2(https_url: str,
                            desc=f'Uniswap V2 {factory_address[:10]}... Sync',
                            ascii=' =',
                            leave=True):
-            events = _request_pair_created_events(*params)
+            events = v2_factory.events.PairCreated.get_logs(fromBlock=params[0], toBlock=params[1])
             for event in events:
                 args = event.args
                 token0 = args.token0
