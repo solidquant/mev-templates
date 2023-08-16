@@ -112,7 +112,7 @@ async def event_handler(event_queue: aioprocessing.AioQueue):
                     
         # calculated estimated cost of bet
         wmatic_price = _get_wmatic_price(reserves)
-        base_fee = int(data['next_base_fee'] * 1.05)
+        base_fee = int(data['next_base_fee'] * 1.1)
         gas_cost_in_wmatic = (base_fee * 550000) / 10 ** 18  # estimated gas usage for 3-hop swap + flashloan
         gas_cost = wmatic_price * gas_cost_in_wmatic
         

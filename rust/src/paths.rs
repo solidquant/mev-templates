@@ -91,6 +91,39 @@ impl ArbPath {
 
         Some(amount_out)
     }
+
+    pub fn optimize_amount_in(
+        &self,
+        max_amount_in: U256,
+        step_size: usize,
+        reserves: &HashMap<H160, Reserve>,
+    ) -> (U256, U256) {
+        let token_in_decimals = if self.zero_for_one_1 {
+            self.pool_1.decimals0
+        } else {
+            self.pool_1.decimals1
+        };
+
+        let mut optimized_in = U256::zero();
+        let mut profit = 0;
+
+        for amount_in in (0..max_amount_in.as_u64()).step_by(step_size) {
+            let amount_in = U256::from(amount_in);
+            let unit = U256::from(10).pow(U256::from(token_in_decimals));
+            if let Some(amount_out) = self.simulate_v2_path(amount_in, &reserves) {
+                let this_profit =
+                    (amount_out.as_u128() as i128) - ((amount_in * unit).as_u128() as i128);
+                if this_profit >= profit {
+                    optimized_in = amount_in;
+                    profit = this_profit;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        (optimized_in, U256::from(profit))
+    }
 }
 
 pub fn generate_triangular_paths(pools: &Vec<Pool>, token_in: H160) -> Vec<ArbPath> {

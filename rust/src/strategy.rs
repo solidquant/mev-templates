@@ -1,15 +1,16 @@
 use ethers::{
     providers::{Provider, Ws},
-    types::{H160, U256},
+    types::{Address, H160, U256},
 };
 use log::info;
 use std::{collections::HashMap, str::FromStr, sync::Arc};
 use tokio::sync::broadcast::Sender;
 
-use crate::constants::{get_blacklist_tokens, Env};
+use crate::constants::{get_blacklist_tokens, Env, WEI};
 use crate::multi::batch_get_uniswap_v2_reserves;
 use crate::paths::generate_triangular_paths;
 use crate::pools::{load_all_pools_from_v2, Pool};
+use crate::simulator::UniswapV2Simulator;
 use crate::streams::Event;
 use crate::utils::get_touched_pool_reserves;
 
@@ -101,7 +102,43 @@ pub async fn event_handler(provider: Arc<Provider<Ws>>, event_sender: Sender<Eve
                         }
                     }
 
-                    info!("{:?}", spreads);
+                    let wmatic_usdc_address =
+                        Address::from_str("0xcd353F79d9FADe311fC3119B841e1f456b54e858").unwrap();
+                    let pool = pools.get(&wmatic_usdc_address).unwrap();
+                    let reserve = reserves.get(&wmatic_usdc_address).unwrap();
+                    let wmatic_price = UniswapV2Simulator::reserves_to_price(
+                        reserve.reserve0,
+                        reserve.reserve1,
+                        pool.decimals0,
+                        pool.decimals1,
+                        true,
+                    );
+
+                    let base_fee = block.next_base_fee;
+                    let estimated_gas_usage = U256::from(550000);
+                    let gas_cost_in_wei = base_fee * estimated_gas_usage;
+                    let gas_cost_in_wmatic =
+                        (gas_cost_in_wei.as_u64() as f64) / ((*WEI).as_u64() as f64);
+                    let gas_cost_in_usdc = wmatic_price * gas_cost_in_wmatic;
+                    let gas_cost_in_usdc =
+                        U256::from((gas_cost_in_usdc * ((10 as f64).powi(usdc_decimals))) as u64);
+
+                    let mut sorted_spreads: Vec<_> = spreads.iter().collect();
+                    sorted_spreads.sort_by_key(|x| x.1);
+                    sorted_spreads.reverse();
+
+                    info!("{:?}", sorted_spreads);
+                    for spread in sorted_spreads {
+                        let path_idx = spread.0;
+                        let path = &paths[*path_idx];
+                        let opt = path.optimize_amount_in(U256::from(1000), 10, &reserves);
+                        let excess_profit =
+                            (opt.1.as_u128() as i128) - (gas_cost_in_usdc.as_u128() as i128);
+
+                        info!("Excess profit: {:?}", excess_profit);
+
+                        if excess_profit > 0 {}
+                    }
                 }
                 Event::PendingTx(_) => {
                     // not using pending tx
