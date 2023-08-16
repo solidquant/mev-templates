@@ -23,7 +23,7 @@ const logger = createLogger({
         logFormat,
         colorize({ all: true }),
     ),
-    // transports: [new transports.Console()],
+    transports: [new transports.Console()],
 });
 
 const blacklistTokens = ['0x9469603F3Efbcf17e4A5868d81C701BDbD222555'];

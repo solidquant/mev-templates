@@ -1,3 +1,5 @@
+const cliProgress = require('cli-progress');
+
 const { logger } = require('./constants');
 
 class ArbPath {
@@ -45,6 +47,9 @@ function generateTriangularPaths(pools, tokenIn) {
 
     pools = Object.values(pools);
 
+    const progress = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic);
+    progress.start(pools.length);
+
     for (let i = 0; i < pools.length; i++) {
         let pool1 = pools[i];
         let canTrade1 = (pool1.token0 == tokenIn) || (pool1.token1 == tokenIn);
@@ -90,8 +95,10 @@ function generateTriangularPaths(pools, tokenIn) {
                 }
             }
         }
+        progress.update(i + 1);
     }
 
+    progress.stop();
     logger.info(`Generated ${paths.length} 3-hop arbitrage paths`);
     return paths;
 }

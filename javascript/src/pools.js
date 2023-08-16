@@ -103,6 +103,17 @@ async function loadAllPoolsFromV2(
     fromBlocks,
     chunk
 ) {
+    /*
+    Retrieves historical events from Uniswap V2 factories.
+
+    Whenever a new pool is created from the Uniswap V2 factory,
+    a "PairCreated" event is emitted. We request for all the PairCreated
+    events from the block these factories were deployed.
+
+    👉 NOTE: the process takes a really long time, because it has room for improvement.
+    This function will make requests to the RPC endpoint one at a time,
+    each looking at events from block range of: [fromBlock, toBlock] chunk size.
+    */
     let pools = loadCachedPools();
     if (Object.keys(pools).length > 0) {
         return pools;
