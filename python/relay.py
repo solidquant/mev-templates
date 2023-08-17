@@ -22,7 +22,7 @@ async def send_bundle(w3: Web3,
 
     receipts = []
 
-    while left_retries > 0:
+    while left_retries >= 0:
         print(f'Sending bundles at: #{block_number}')
         try:
             flashbots.simulate(bundle, block_number)

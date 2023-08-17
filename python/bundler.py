@@ -103,7 +103,7 @@ class Bundler:
         """
         return self.bot.functions.recoverToken(token).build_transaction({
             **self._common_fields,
-            'gas': 200000,
+            'gas': 50000,
             'maxFeePerGas': max_fee_per_gas,
             'maxPriorityFeePerGas': max_priority_fee_per_gas,
         })

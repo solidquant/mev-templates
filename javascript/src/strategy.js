@@ -14,6 +14,7 @@ const { generateTriangularPaths } = require('./paths');
 const { batchGetUniswapV2Reserves } = require('./multi');
 const { streamNewBlocks } = require('./streams');
 const { getTouchedPoolReserves } = require('./utils');
+const { Bundler, Path, Flashloan, ZERO_ADDRESS } = require('./bundler');
 
 async function main() {
     const provider = new ethers.providers.JsonRpcProvider(HTTPS_URL);
@@ -46,6 +47,15 @@ async function main() {
     let reserves = await batchGetUniswapV2Reserves(HTTPS_URL, Object.keys(pools));
     let e = new Date();
     logger.info(`Batch reserves call took: ${(e - s) / 1000} seconds`);
+
+    // Transaction handler (can send transactions to mempool / bundles to Flashbots)
+    let bundler = new Bundler(
+        PRIVATE_KEY,
+        SIGNING_KEY,
+        HTTPS_URL,
+        BOT_ADDRESS,
+    );
+    await bundler.setup();
     
     let eventEmitter = new EventEmitter();
 
