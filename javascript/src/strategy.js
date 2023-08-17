@@ -7,6 +7,7 @@ const {
 const { logger, blacklistTokens } = require('./constants');
 const { loadAllPoolsFromV2 } = require('./pools');
 const { generateTriangularPaths } = require('./paths');
+const { batchGetUniswapV2Reserves } = require('./multi');
 
 async function main() {
     const factoryAddresses = ['0xc35DADB65012eC5796536bD9864eD8773aBc74C4'];
@@ -32,6 +33,11 @@ async function main() {
         }
     }
     logger.info(`New pool count: ${Object.keys(pools).length}`);
+
+    let s = new Date();
+    let reserves = await batchGetUniswapV2Reserves(HTTPS_URL, Object.keys(pools));
+    let e = new Date();
+    logger.info(`Batch reserves call took: ${(e - s) / 1000} seconds`);
 }
 
 module.exports = {
