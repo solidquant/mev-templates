@@ -58,7 +58,7 @@ class ArbPath:
         profit = 0
         for amount_in in range(0, max_amount_in, step_size):
             amount_out = self.simulate_v2_path(amount_in, reserves)
-            this_profit = amount_out - amount_in
+            this_profit = amount_out - (amount_in * (10 ** token_in_decimals))
             if this_profit >= profit:
                 optimized_in = amount_in
                 profit = this_profit

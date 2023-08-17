@@ -111,7 +111,7 @@ async function loadAllPoolsFromV2(
     events from the block these factories were deployed.
 
     👉 NOTE: the process takes a really long time, because it has room for improvement.
-    This function will make requests to the RPC endpoint one at a time,
+    This function will make requests to the RPC endpoint one batch at a time,
     each looking at events from block range of: [fromBlock, toBlock] chunk size.
     */
     let pools = loadCachedPools();

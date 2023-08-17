@@ -55,7 +55,7 @@ module.exports = {
     // env variables
     HTTPS_URL: process.env.HTTPS_URL,
     WSS_URL: process.env.WSS_URL,
-    CHAIN_ID: process.env.CHAIN_ID,
+    CHAIN_ID: process.env.CHAIN_ID || 1,
     BLOCKNATIVE_TOKEN: process.env.BLOCKNATIVE_TOKEN,
     PRIVATE_KEY: process.env.PRIVATE_KEY,
     SIGNING_KEY: process.env.SIGNING_KEY,

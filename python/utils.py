@@ -111,7 +111,7 @@ def get_touched_pool_reserves(w3: Web3, block_number: int) -> Dict[str, List[int
             address = log['address']
             idx = log['transactionIndex']
             prev_tx_idx = tx_idx.get(address, 0)
-            if idx > prev_tx_idx:
+            if idx >= prev_tx_idx:
                 decoded = eth_abi.decode(['uint112', 'uint112'], bytes.fromhex(log['data'][2:]))
                 reserves[address] = list(decoded)
                 tx_idx[address] = idx

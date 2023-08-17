@@ -1,6 +1,17 @@
 const cliProgress = require('cli-progress');
 
 const { logger } = require('./constants');
+const { UniswapV2Simulator } = require('./simulator');
+
+const range = (start, stop, step) => {
+    let loopCnt = Math.ceil((stop - start) / step);
+    let rangeArray = [];
+    for (let i = 0; i < loopCnt; i++) {
+        let num = start + (i * step);
+        rangeArray.push(num);
+    }
+    return rangeArray;
+}
 
 class ArbPath {
     constructor(
@@ -24,9 +35,9 @@ class ArbPath {
     }
 
     hasPool(pool) {
-        let isPool1 = this.pool1 == pool;
-        let isPool2 = this.pool2 == pool;
-        let isPool3 = this.pool3 == pool;
+        let isPool1 = this.pool1.address.toLowerCase() == pool.toLowerCase();
+        let isPool2 = this.pool2.address.toLowerCase() == pool.toLowerCase();
+        let isPool3 = this.pool3.address.toLowerCase() == pool.toLowerCase();
         return isPool1 || isPool2 || isPool3;
     }
 
@@ -39,10 +50,54 @@ class ArbPath {
             return false;
         }
     }
+
+    simulateV2Path(amountIn, reserves) {
+        let tokenInDecimals = this.zeroForOne1 ? this.pool1.decimals0 : this.pool1.decimals1;
+        let amountOut = amountIn * 10 ** tokenInDecimals;
+
+        let sim = new UniswapV2Simulator();
+        let nhop = this.nhop();
+        for (let i = 0; i < nhop; i++) {
+            let pool = this[`pool${i + 1}`];
+            let zeroForOne = this[`zeroForOne${i + 1}`];
+            let reserve0 = reserves[pool.address][0];
+            let reserve1 = reserves[pool.address][1];
+            let fee = pool.fee;
+            let reserveIn = zeroForOne ? reserve0 : reserve1;
+            let reserveOut = zeroForOne ? reserve1 : reserve0;
+            amountOut = sim.getAmountOut(amountOut, reserveIn, reserveOut, fee);
+        }
+        return amountOut;
+    }
+
+    optimizeAmountIn(maxAmountIn, stepSize, reserves) {
+        let tokenInDecimals = this.zeroForOne1 ? this.pool1.decimals0 : this.pool1.decimals1;
+        let optimizedIn = 0;
+        let profit = 0;
+        for (let amountIn of range(0, maxAmountIn, stepSize)) {
+            let amountOut = this.simulateV2Path(amountIn, reserves);
+            let thisProfit = amountOut - (amountIn * (10 ** tokenInDecimals));
+            if (thisProfit >= profit) {
+                optimizedIn = amountIn;
+                profit = thisProfit;
+            } else {
+                break;
+            }
+        }
+        return [optimizedIn, profit / (10 ** tokenInDecimals)];
+    }
 }
 
 
 function generateTriangularPaths(pools, tokenIn) {
+    /*
+    This can easily be refactored into a recursive function to support the
+    generation of n-hop paths. However, I left it as a 3-hop path generating function
+    just for demonstration. This will be easier to follow along.
+
+    👉 The recursive version can be found here (Python):
+    https://github.com/solidquant/whack-a-mole/blob/main/data/dex.py
+    */
     const paths = [];
 
     pools = Object.values(pools);

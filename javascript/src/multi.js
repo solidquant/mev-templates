@@ -8,6 +8,7 @@ const {
 } = require('./constants');
 
 async function getUniswapV2Reserves(httpsUrl, poolAddresses) {
+    // 👉 Example of multicall provided: https://github.com/mds1/multicall/tree/main/examples/typescript
     const v2PairInterface = new ethers.Interface(UniswapV2PairAbi);
 
     const calls = poolAddresses.map(address => ({
@@ -33,6 +34,9 @@ async function getUniswapV2Reserves(httpsUrl, poolAddresses) {
 }
 
 async function batchGetUniswapV2Reserves(httpsUrl, poolAddresses) {
+    // There's a limit to how many requests you can send per call.
+    // I've set the request chunk size to 200.
+    // This will generally cost you 1~2 seconds per 7~10 batches using a node service.
     let poolsCnt = poolAddresses.length;
     let batch = Math.ceil(poolsCnt / 200);
     let poolsPerBatch = Math.ceil(poolsCnt / batch);
