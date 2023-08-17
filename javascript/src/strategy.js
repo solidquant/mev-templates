@@ -1,10 +1,12 @@
 const { ethers } = require('ethers');
 const EventEmitter = require('events');
-const v2FactoryABI = require('../abi/UniswapV2Factory.json');
 
 const {
     HTTPS_URL,
     WSS_URL,
+    PRIVATE_KEY,
+    SIGNING_KEY,
+    BOT_ADDRESS,
 } = require('./constants');
 const { logger, blacklistTokens } = require('./constants');
 const { loadAllPoolsFromV2 } = require('./pools');
@@ -14,7 +16,7 @@ const { streamNewBlocks } = require('./streams');
 const { getTouchedPoolReserves } = require('./utils');
 
 async function main() {
-    const provider = new ethers.JsonRpcProvider(HTTPS_URL);
+    const provider = new ethers.providers.JsonRpcProvider(HTTPS_URL);
 
     const factoryAddresses = ['0xc35DADB65012eC5796536bD9864eD8773aBc74C4'];
     const factoryBlocks = [11333218];

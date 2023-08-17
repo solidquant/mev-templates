@@ -61,6 +61,9 @@ module.exports = {
     SIGNING_KEY: process.env.SIGNING_KEY,
     BOT_ADDRESS: process.env.BOT_ADDRESS,
 
+    // abi
+    BOT_ABI: require('../abi/V2ArbBot.json'),
+
     // logging
     logger,
 
@@ -73,4 +76,7 @@ module.exports = {
     // multicall
     MULTICALL_ADDRESS,
     MULTICALL_ABI,
+
+    // flashbots
+    PRIVATE_RELAY: 'https://relay.flashbots.net',
 };

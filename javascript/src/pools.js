@@ -119,7 +119,7 @@ async function loadAllPoolsFromV2(
         return pools;
     }
 
-    const provider = new ethers.JsonRpcProvider(httpsUrl);
+    const provider = new ethers.providers.JsonRpcProvider(httpsUrl);
     const toBlock = await provider.getBlockNumber();
     
     const decimals = {};

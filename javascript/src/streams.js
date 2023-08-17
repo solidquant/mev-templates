@@ -3,7 +3,7 @@ const { ethers } = require('ethers');
 const { calculateNextBlockBaseFee, estimateNextBlockGas } = require('./utils');
 
 function streamNewBlocks(wssUrl, eventEmitter) {
-    const wss = new ethers.WebSocketProvider(wssUrl);
+    const wss = new ethers.providers.WebSocketProvider(wssUrl);
 
     wss.on('block', async (blockNumber) => {
         let block = await wss.getBlock(blockNumber);
@@ -13,7 +13,7 @@ function streamNewBlocks(wssUrl, eventEmitter) {
         eventEmitter.emit('event', {
             type: 'block',
             blockNumber: block.number,
-            baseFee: block.baseFeePerGas,
+            baseFee: BigInt(block.baseFeePerGas),
             nextBaseFee,
             ...estimateGas,
         });
@@ -21,7 +21,7 @@ function streamNewBlocks(wssUrl, eventEmitter) {
 }
 
 function streamPendingTransactions(wssUrl, eventEmitter) {
-    const wss = new ethers.WebSocketProvider(wssUrl);
+    const wss = new ethers.providers.WebSocketProvider(wssUrl);
     
     wss.on('pending', async (txHash) => {
         eventEmitter.emit('event', {
@@ -34,9 +34,9 @@ function streamPendingTransactions(wssUrl, eventEmitter) {
 function streamUniswapV2Events(wssUrl, eventEmitter) {
     // This stream isn't used in the example DEX arb,
     // but is here to demonstrate how to subscribe to events.
-    const wss = new ethers.WebSocketProvider(wssUrl);
+    const wss = new ethers.providers.WebSocketProvider(wssUrl);
 
-    const syncEventSelector = ethers.id('Sync(uint112,uint112)');
+    const syncEventSelector = ethers.utils.id('Sync(uint112,uint112)');
     const filter = {topics: [syncEventSelector]};
 
     wss.on(filter, async (event) => {

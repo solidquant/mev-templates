@@ -7,9 +7,9 @@ const {
 } = require('./constants');
 
 const calculateNextBlockBaseFee = (block) => {
-    let baseFee = block.baseFeePerGas;
-    let gasUsed = block.gasUsed;
-    let gasLimit = block.gasLimit;
+    let baseFee = BigInt(block.baseFeePerGas);
+    let gasUsed = BigInt(block.gasUsed);
+    let gasLimit = BigInt(block.gasLimit);
 
     let targetGasUsed = gasLimit / BigInt(2);
     targetGasUsed = targetGasUsed == BigInt(0) ? BigInt(1) : targetGasUsed;
@@ -44,14 +44,14 @@ async function estimateNextBlockGas() {
 }
 
 async function getTouchedPoolReserves(provider, blockNumber) {
-    const syncEventSelector = ethers.id('Sync(uint112,uint112)');
+    const syncEventSelector = ethers.utils.id('Sync(uint112,uint112)');
     const filter = {
         fromBlock: blockNumber,
         toBlock: blockNumber,
         topics: [syncEventSelector],
     };
 
-    let abiCoder = new ethers.AbiCoder();
+    let abiCoder = new ethers.utils.AbiCoder();
     let logs = await provider.getLogs(filter);
     let txIdx = {};
     let reserves = {};
@@ -63,7 +63,7 @@ async function getTouchedPoolReserves(provider, blockNumber) {
             let decoded = abiCoder.decode(
                 ['uint112', 'uint112'], log.data
             );
-            reserves[address] = [decoded[0], decoded[1]];
+            reserves[address] = [BigInt(decoded[0]), BigInt(decoded[1])];
             txIdx[address] = idx;
         }
     }

@@ -9,24 +9,24 @@ const {
 
 async function getUniswapV2Reserves(httpsUrl, poolAddresses) {
     // 👉 Example of multicall provided: https://github.com/mds1/multicall/tree/main/examples/typescript
-    const v2PairInterface = new ethers.Interface(UniswapV2PairAbi);
+    const v2PairInterface = new ethers.utils.Interface(UniswapV2PairAbi);
 
     const calls = poolAddresses.map(address => ({
         target: address,
         allowFailure: true,
-        callData: v2PairInterface.encodeFunctionData('getReserves', []),
+        callData: v2PairInterface.encodeFunctionData('getReserves', []),  // 0x0902f1ac
     }));
 
-    const provider = new ethers.JsonRpcProvider(httpsUrl);
+    const provider = new ethers.providers.JsonRpcProvider(httpsUrl);
     const multicall = new ethers.Contract(MULTICALL_ADDRESS, MULTICALL_ABI, provider);
-    const result = await multicall.aggregate3.staticCall(calls);
+    const result = await multicall.callStatic.aggregate3(calls);
 
     let reserves = {};
     for (let i = 0; i < result.length; i++) {
         let response = result[i];
         if (response.success) {
             let decoded = v2PairInterface.decodeFunctionResult('getReserves', response.returnData);
-            reserves[poolAddresses[i]] = [decoded[0], decoded[1]];
+            reserves[poolAddresses[i]] = [BigInt(decoded[0]), BigInt(decoded[1])];
         }
     }
 
