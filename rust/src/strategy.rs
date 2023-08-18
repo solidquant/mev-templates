@@ -127,15 +127,12 @@ pub async fn event_handler(provider: Arc<Provider<Ws>>, event_sender: Sender<Eve
                     sorted_spreads.sort_by_key(|x| x.1);
                     sorted_spreads.reverse();
 
-                    info!("{:?}", sorted_spreads);
                     for spread in sorted_spreads {
                         let path_idx = spread.0;
                         let path = &paths[*path_idx];
                         let opt = path.optimize_amount_in(U256::from(1000), 10, &reserves);
                         let excess_profit =
                             (opt.1.as_u128() as i128) - (gas_cost_in_usdc.as_u128() as i128);
-
-                        info!("Excess profit: {:?}", excess_profit);
 
                         // TODO
                         if excess_profit > 0 {}
