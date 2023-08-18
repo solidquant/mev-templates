@@ -28,3 +28,17 @@ The templates all include an example **DEX flashloan arbitrage strategy** to dem
 In this Github repository, you can pick one of the most popular languages to use in your MEV project. By studying this project, you'll get a feel for how MEV strategies are built.
 
 Most strategies share a common code base, and this repository is an attempt to include the basic tooling required for all level of traders to have in their pockets.
+
+---
+
+You can find more about this project in my blog post:
+
+[👉 MEV templates written in Python, Javascript, and Rust](https://medium.com/@solidquant/mev-templates-written-in-python-javascript-and-rust-ddd3d324d709)
+
+⚡️ Plus, come join our Discord community to take this journey together. We’re actively reviewing the code used in these blog posts to guarantee safe usage by all our members. Though still in its infancy, we’re slowly growing and collaborating on research/projects in the 💫 MEV space 🏄‍♀️🏄‍♂️:
+
+Join the Solid Quant Discord Server!
+Quant hobbyists doing quant stuff - mainly MEV related at the moment. | 145 members
+discord.com
+
+Also, for people that want to reach out to me, they can e-mail me directly at: solidquant@gmail.com
