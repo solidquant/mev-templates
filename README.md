@@ -37,8 +37,6 @@ You can find more about this project in my blog post:
 
 ⚡️ Plus, come join our Discord community to take this journey together. We’re actively reviewing the code used in these blog posts to guarantee safe usage by all our members. Though still in its infancy, we’re slowly growing and collaborating on research/projects in the 💫 MEV space 🏄‍♀️🏄‍♂️:
 
-Join the Solid Quant Discord Server!
-Quant hobbyists doing quant stuff - mainly MEV related at the moment. | 145 members
-discord.com
+[👨‍👩‍👦‍👦 Join the Solid Quant Discord Server!](https://discord.com/invite/e6KpjTQP98)
 
 Also, for people that want to reach out to me, they can e-mail me directly at: solidquant@gmail.com
