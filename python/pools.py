@@ -1,5 +1,4 @@
 import csv
-import json
 
 from tqdm import tqdm
 from enum import Enum
@@ -12,7 +11,6 @@ from constants import *
 class DexVariant(Enum):
     UniswapV2 = 2
     UniswapV3 = 3
-
 
 class Pool:
 
@@ -43,6 +41,7 @@ class Pool:
             self.decimals1,
             self.fee,
         ]
+
 
 
 def load_cached_pools() -> Optional[Dict[str, Pool]]:
