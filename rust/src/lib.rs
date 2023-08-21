@@ -1,6 +1,7 @@
 pub mod abi;
 pub mod bundler;
 pub mod constants;
+pub mod evm;
 pub mod multi;
 pub mod paths;
 pub mod pools;

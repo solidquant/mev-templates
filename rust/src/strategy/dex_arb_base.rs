@@ -1,3 +1,4 @@
+use cfmms::dex::DexVariant;
 use ethers::{
     providers::{Provider, Ws},
     types::{Address, H160, U256},
@@ -9,19 +10,26 @@ use tokio::sync::broadcast::Sender;
 use crate::constants::{get_blacklist_tokens, Env, WEI};
 use crate::multi::batch_get_uniswap_v2_reserves;
 use crate::paths::generate_triangular_paths;
-use crate::pools::{load_all_pools_from_v2, Pool};
+use crate::pools::{load_all_pools, Pool};
 use crate::simulator::UniswapV2Simulator;
 use crate::streams::Event;
 use crate::utils::get_touched_pool_reserves;
 
 pub async fn event_handler(provider: Arc<Provider<Ws>>, event_sender: Sender<Event>) {
+    /*
+    A simple DEX triangular arbitrage strategy ran on Polygon.
+    This strategy doesn't use revm simulations, but instead relies on offline simulations.
+    For people interested in using revm, go to: dex_arb_advanced.rs
+    */
     let env = Env::new();
 
-    let factory_addresses = vec!["0xc35DADB65012eC5796536bD9864eD8773aBc74C4"];
-    let router_addresses = vec!["0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506"];
-    let factory_blocks = vec![11333218u64];
+    let factories = vec![(
+        "0xc35DADB65012eC5796536bD9864eD8773aBc74C4",
+        DexVariant::UniswapV2,
+        11333218u64,
+    )];
 
-    let pools_vec = load_all_pools_from_v2(env.wss_url.clone(), factory_addresses, factory_blocks)
+    let pools_vec = load_all_pools(env.wss_url.clone(), factories)
         .await
         .unwrap();
     info!("Initial pool count: {}", pools_vec.len());
@@ -57,8 +65,7 @@ pub async fn event_handler(provider: Arc<Provider<Ws>>, event_sender: Sender<Eve
                 Event::Block(block) => {
                     info!("{:?}", block);
                     let touched_reserves =
-                        match get_touched_pool_reserves(provider.clone(), block.block_number).await
-                        {
+                        match get_touched_pool_reserves(provider.clone(), block.number).await {
                             Ok(response) => response,
                             Err(e) => {
                                 info!("Error from get_touched_pool_reserves: {:?}", e);

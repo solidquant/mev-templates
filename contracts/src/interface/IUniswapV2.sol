@@ -4,6 +4,8 @@ pragma solidity ^0.8.13;
 interface IUniswapV2Pair {
     function token0() external returns (address);
 
+    function getReserves() external returns (uint112, uint112, uint32);
+
     function swap(
         uint amount0Out,
         uint amount1Out,

@@ -15,6 +15,8 @@ use std::{str::FromStr, sync::Arc};
 use url::Url;
 
 use crate::constants::Env;
+use crate::paths::ArbPath;
+use crate::pools::Pool;
 
 abigen!(
     ArbBot,
@@ -46,6 +48,70 @@ pub enum Flashloan {
     NotUsed = 0,
     Balancer = 1,
     UniswapV2 = 2,
+}
+
+pub fn make_path_params(path: &ArbPath) -> Vec<PathParam> {
+    let mut path_params = Vec::new();
+
+    for i in 0..path.nhop {
+        let pool = match i {
+            0 => Some(&path.pool_1),
+            1 => Some(&path.pool_2),
+            2 => Some(&path.pool_3),
+            _ => None,
+        }
+        .unwrap();
+        let zero_for_one = match i {
+            0 => Some(path.zero_for_one_1),
+            1 => Some(path.zero_for_one_2),
+            2 => Some(path.zero_for_one_3),
+            _ => None,
+        }
+        .unwrap();
+
+        let token_in;
+        let token_out;
+
+        if zero_for_one {
+            token_in = pool.token0;
+            token_out = pool.token1;
+        } else {
+            token_in = pool.token1;
+            token_out = pool.token0;
+        }
+
+        path_params.push(PathParam {
+            router: pool.address,
+            token_in,
+            token_out,
+        });
+    }
+
+    path_params
+}
+
+pub fn order_tx_calldata(
+    paths: &Vec<PathParam>,
+    amount_in: U256,
+    flashloan: Flashloan,
+    loan_from: Address,
+) -> Bytes {
+    let nhop = paths.len();
+
+    let mut params = Vec::new();
+    params.extend(vec![
+        abi::Token::Uint(amount_in),
+        abi::Token::Uint(U256::from(flashloan as u64)),
+        abi::Token::Address(loan_from),
+    ]);
+
+    for i in 0..nhop {
+        params.extend(paths[i].make_params());
+    }
+
+    let encoded = abi::encode(&params);
+    let calldata = Bytes::from(encoded);
+    calldata
 }
 
 type SignerProvider = SignerMiddleware<Provider<Http>, LocalWallet>;
@@ -244,22 +310,7 @@ impl Bundler {
         max_priority_fee_per_gas: U256,
         max_fee_per_gas: U256,
     ) -> Result<Eip1559TransactionRequest> {
-        let nhop = paths.len();
-
-        let mut params = Vec::new();
-        params.extend(vec![
-            abi::Token::Uint(amount_in),
-            abi::Token::Uint(U256::from(flashloan as u64)),
-            abi::Token::Address(loan_from),
-        ]);
-
-        for i in 0..nhop {
-            params.extend(paths[i].make_params());
-        }
-
-        let encoded = abi::encode(&params);
-        let calldata = Bytes::from(encoded);
-
+        let calldata = order_tx_calldata(&paths, amount_in, flashloan, loan_from);
         let common = self._common_fields().await?;
         let to = NameOrAddress::Address(H160::from_str(&self.env.bot_address).unwrap());
         Ok(Eip1559TransactionRequest {

@@ -10,9 +10,12 @@ use tokio_stream::StreamExt;
 
 #[derive(Default, Debug, Clone)]
 pub struct NewBlock {
-    pub block_number: U64,
-    pub base_fee: U256,
+    pub number: U64,
+    pub base_fee_per_gas: U256,
     pub next_base_fee: U256,
+    pub timestamp: U256,
+    pub gas_used: U256,
+    pub gas_limit: U256,
 }
 
 #[derive(Debug, Clone)]
@@ -25,13 +28,16 @@ pub async fn stream_new_blocks(provider: Arc<Provider<Ws>>, event_sender: Sender
     let stream = provider.subscribe_blocks().await.unwrap();
     let mut stream = stream.filter_map(|block| match block.number {
         Some(number) => Some(NewBlock {
-            block_number: number,
-            base_fee: block.base_fee_per_gas.unwrap_or_default(),
+            number,
+            base_fee_per_gas: block.base_fee_per_gas.unwrap_or_default(),
             next_base_fee: U256::from(calculate_next_block_base_fee(
                 block.gas_used.as_u64(),
                 block.gas_limit.as_u64(),
                 block.base_fee_per_gas.unwrap_or_default().as_u64(),
             )),
+            timestamp: block.timestamp,
+            gas_used: block.gas_used,
+            gas_limit: block.gas_limit,
         }),
         None => None,
     });

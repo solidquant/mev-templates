@@ -70,7 +70,11 @@ pub async fn get_touched_pool_reserves(
                         Token::Uint(rs) => rs,
                         _ => U256::zero(),
                     };
-                    let reserve = Reserve { reserve0, reserve1 };
+                    let reserve = Reserve {
+                        reserve0,
+                        reserve1,
+                        liquidity: U256::zero(),
+                    };
 
                     reserves.insert(log.address, reserve);
                     tx_idx.insert(log.address, idx);

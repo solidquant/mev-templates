@@ -6,7 +6,7 @@ use tokio::sync::broadcast::{self, Sender};
 use tokio::task::JoinSet;
 
 use rust::constants::Env;
-use rust::strategy::dex_arb_base::event_handler;
+use rust::strategy::dex_arb_advanced::event_handler;
 use rust::streams::{stream_new_blocks, stream_pending_transactions, Event};
 use rust::utils::setup_logger;
 
@@ -26,7 +26,6 @@ async fn main() -> Result<()> {
     let mut set = JoinSet::new();
 
     set.spawn(stream_new_blocks(provider.clone(), event_sender.clone()));
-    // we're not using the mempool data here, but uncomment it to use pending txs
     // set.spawn(stream_pending_transactions(
     //     provider.clone(),
     //     event_sender.clone(),

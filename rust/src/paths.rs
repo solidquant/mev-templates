@@ -85,8 +85,18 @@ impl ArbPath {
                 reserve_out = reserve0;
             }
 
+            // let _amount_in = amount_out.clone();
             amount_out =
                 UniswapV2Simulator::get_amount_out(amount_out, reserve_in, reserve_out, fee)?;
+
+            // println!(
+            //     "{:?} {:?} --> {:?} (In: {:?}) Out: {:?}",
+            //     pool.address, pool.token0, pool.token1, _amount_in, amount_out
+            // );
+            // println!(
+            //     "Reserve in: {:?} / Reserve Out: {:?}",
+            //     reserve_in, reserve_out
+            // );
         }
 
         Some(amount_out)
@@ -202,13 +212,13 @@ pub fn generate_triangular_paths(pools: &Vec<Pool>, token_in: H160) -> Vec<ArbPa
                                 };
 
                                 paths.push(arb_path);
-                                pb.inc(1);
                             }
                         }
                     }
                 }
             }
         }
+        pb.inc(1);
     }
 
     pb.finish_with_message(format!(

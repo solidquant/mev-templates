@@ -65,10 +65,9 @@ impl Pool {
     }
 }
 
-pub async fn load_all_pools_from_v2(
+pub async fn load_all_pools(
     wss_url: String,
-    factory_addresses: Vec<&str>,
-    from_blocks: Vec<u64>,
+    factories: Vec<(&str, CfmmsDexVariant, u64)>,
 ) -> Result<Vec<Pool>> {
     // Load from cached file if the file exists
     let file_path = Path::new("src/.cached-pools.csv");
@@ -87,17 +86,7 @@ pub async fn load_all_pools_from_v2(
     let ws = Ws::connect(wss_url).await?;
     let provider = Arc::new(Provider::new(ws));
 
-    let mut dexes_data = Vec::new();
-
-    for i in 0..factory_addresses.len() {
-        dexes_data.push((
-            factory_addresses[i].clone(),
-            CfmmsDexVariant::UniswapV2,
-            from_blocks[i],
-        ))
-    }
-
-    let dexes: Vec<_> = dexes_data
+    let dexes: Vec<_> = factories
         .into_iter()
         .map(|(address, variant, number)| {
             Dex::new(

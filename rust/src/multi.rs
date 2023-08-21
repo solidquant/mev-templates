@@ -14,6 +14,7 @@ use crate::{abi::ABI, pools::Pool};
 pub struct Reserve {
     pub reserve0: U256,
     pub reserve1: U256,
+    pub liquidity: U256,
 }
 
 pub async fn get_uniswap_v2_reserves(
@@ -48,6 +49,7 @@ pub async fn get_uniswap_v2_reserves(
                 let reserve_data = Reserve {
                     reserve0: response[0].clone().into_uint().unwrap(),
                     reserve1: response[1].clone().into_uint().unwrap(),
+                    liquidity: U256::zero(),
                 };
                 reserves.insert(pool.address.clone(), reserve_data);
             }
@@ -93,3 +95,46 @@ pub async fn batch_get_uniswap_v2_reserves(
     );
     reserves
 }
+
+pub async fn get_uniswap_v3_liquidity(https_url: String, pools: Vec<Pool>) -> Result<()> {
+    let client = Provider::<Http>::try_from(https_url)?;
+    let client = Arc::new(client);
+
+    let abi = ABI::new();
+    let mut multicall = Multicall::new(client.clone(), None).await?;
+
+    for pool in &pools {
+        let contract = Contract::<Provider<Http>>::new(
+            pool.address,
+            abi.uniswap_v2_pair.clone(),
+            client.clone(),
+        );
+        let call = contract.method::<_, H256>("slot0", ())?;
+        multicall.add_call(call, false);
+    }
+
+    let result = multicall.call_raw().await?;
+
+    // let mut liquidity_map = HashMap::new();
+
+    for i in 0..result.len() {
+        let pool = &pools[i];
+        let liquidity = result[i].clone();
+        match liquidity.unwrap() {
+            abi::Token::Tuple(response) => {
+                info!("{:?}", response);
+                // let reserve_data = Reserve {
+                //     reserve0: response[0].clone().into_uint().unwrap(),
+                //     reserve1: response[1].clone().into_uint().unwrap(),
+                //     liquidity: U256::zero(),
+                // };
+                // reserves.insert(pool.address.clone(), reserve_data);
+            }
+            _ => {}
+        }
+    }
+
+    Ok(())
+}
+
+pub async fn batch_get_uniswap_v3_liquidity() {}
