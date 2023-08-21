@@ -38,7 +38,8 @@ impl Env {
 }
 
 pub fn get_blacklist_tokens() -> Vec<H160> {
-    vec!["0x9469603F3Efbcf17e4A5868d81C701BDbD222555"]
+    // Polygon: 0x9469603F3Efbcf17e4A5868d81C701BDbD222555
+    vec![]
         .into_iter()
         .map(|addr| H160::from_str(addr).unwrap())
         .collect()

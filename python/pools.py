@@ -43,7 +43,6 @@ class Pool:
         ]
 
 
-
 def load_cached_pools() -> Optional[Dict[str, Pool]]:
     if os.path.exists(CACHED_POOLS_FILE):
         f = open(CACHED_POOLS_FILE, 'r')

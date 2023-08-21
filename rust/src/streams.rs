@@ -46,7 +46,7 @@ pub async fn stream_new_blocks(provider: Arc<Provider<Ws>>, event_sender: Sender
 
 pub async fn stream_pending_transactions(provider: Arc<Provider<Ws>>, event_sender: Sender<Event>) {
     let stream = provider.subscribe_pending_txs().await.unwrap();
-    let mut stream = stream.transactions_unordered(256).fuse();
+    let mut stream = stream.transactions_unordered(512).fuse();
 
     while let Some(result) = stream.next().await {
         match result {
@@ -58,5 +58,3 @@ pub async fn stream_pending_transactions(provider: Arc<Provider<Ws>>, event_send
         };
     }
 }
-
-pub async fn stream_uniswap_v2_events() {}

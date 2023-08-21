@@ -6,7 +6,7 @@ use tokio::sync::broadcast::{self, Sender};
 use tokio::task::JoinSet;
 
 use rust::constants::Env;
-use rust::strategy::event_handler;
+use rust::strategy::dex_arb_base::event_handler;
 use rust::streams::{stream_new_blocks, stream_pending_transactions, Event};
 use rust::utils::setup_logger;
 
