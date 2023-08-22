@@ -44,6 +44,8 @@ impl EvmSimulator {
         }
     }
 
+    pub async fn simulate_swap() {}
+
     pub async fn simulate_weth_arbitrage(
         &self,
         new_block: &NewBlock,

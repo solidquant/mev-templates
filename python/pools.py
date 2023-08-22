@@ -12,6 +12,7 @@ class DexVariant(Enum):
     UniswapV2 = 2
     UniswapV3 = 3
 
+
 class Pool:
 
     def __init__(self,
