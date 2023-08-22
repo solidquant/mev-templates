@@ -44,7 +44,27 @@ impl EvmSimulator {
         }
     }
 
-    pub async fn simulate_swap() {}
+    pub async fn simulate_swap_v2(
+        &self,
+        new_block: &NewBlock,
+        amount_in: U256,
+        pair: &str,
+        token_in: &str,
+        token_out: &str,
+    ) {
+        let shared_backend = SharedBackend::spawn_backend_thread(
+            self.provider.clone(),
+            BlockchainDb::new(
+                BlockchainDbMeta {
+                    cfg_env: Default::default(),
+                    block_env: Default::default(),
+                    hosts: BTreeSet::from(["".to_string()]),
+                },
+                None,
+            ),
+            Some(new_block.number.into()),
+        );
+    }
 
     pub async fn simulate_weth_arbitrage(
         &self,
