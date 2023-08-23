@@ -92,7 +92,7 @@ pub fn benchmark_function(_: &mut Criterion) {
     let client = Provider::<Http>::try_from(env.https_url.clone()).unwrap();
     let client = Arc::new(client);
     let took = s.elapsed().as_micros();
-    println!("1. HTTP provider creatio | Took: {:?} microsec", took);
+    println!("1. HTTP provider created | Took: {:?} microsec", took);
 
     // runtime for async tasks
     let rt = Runtime::new().unwrap();

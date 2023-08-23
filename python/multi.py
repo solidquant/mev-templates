@@ -38,7 +38,7 @@ def batch_get_uniswap_v2_reserves(https_url: str, pools: Dict[str, Pool]):
     mp = multiprocessing.Pool()
     
     pools_cnt = len(pools)
-    batch = math.ceil(pools_cnt / 200)
+    batch = math.ceil(pools_cnt / 250)
     pools_per_batch = math.ceil(pools_cnt / batch)
     
     args = []
