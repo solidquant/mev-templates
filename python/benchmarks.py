@@ -1,10 +1,44 @@
 import time
+import asyncio
+import aioprocessing
 from web3 import Web3
+from typing import Callable
+from functools import partial
 
-from constants import HTTPS_URL
+from constants import HTTPS_URL, WSS_URL
 from pools import load_all_pools_from_v2
 from paths import generate_triangular_paths
 from multi import get_uniswap_v2_reserves, batch_get_uniswap_v2_reserves
+from streams import stream_new_blocks, stream_pending_transactions
+
+
+async def logging_event_handler(event_queue: aioprocessing.AioQueue):
+    w3 = Web3(Web3.HTTPProvider(HTTPS_URL))
+    
+    while True:
+        try:
+            data = await event_queue.coro_get()
+
+            if data['type'] == 'pending_tx':
+                print(data)
+        except Exception as _:
+            break
+            
+
+async def benchmark_streams(stream_func: Callable,
+                            handler_func: Callable,
+                            run_time: int):
+    
+    event_queue = aioprocessing.AioQueue()
+        
+    stream_task = asyncio.create_task(stream_func(WSS_URL, event_queue, False))
+    handler_task = asyncio.create_task(handler_func(event_queue))
+    
+    await asyncio.sleep(run_time)
+    event_queue.put(0)
+    
+    stream_task.cancel()
+    handler_task.cancel()
 
 
 if __name__ == '__main__':
@@ -65,4 +99,11 @@ if __name__ == '__main__':
     reserves = batch_get_uniswap_v2_reserves(HTTPS_URL, pools)
     took = (time.time() - s) * 1000
     print(f'5. Bulk multicall result for {len(reserves)} | Took: {took} ms')
+    
+    #######################################
+    # 6️⃣ Pending transaction async stream #
+    #######################################
+    stream_func = stream_pending_transactions
+    handler_func = logging_event_handler
+    asyncio.run(benchmark_streams(stream_func, handler_func, 20))
     
