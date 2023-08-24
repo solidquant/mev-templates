@@ -382,10 +382,13 @@ pub fn benchmark_function(_: &mut Criterion) {
         };
         let signed_tx = bundler.sign_tx(tx).await.unwrap();
         let bundle = bundler.to_bundle(vec![signed_tx], block.number.unwrap());
+        let took = s.elapsed().as_millis();
+        println!("- Creating bundle took: {:?} ms", took);
         // let bundle_hash = match bundler.send_bundle(bundle).await {
         //     Ok(bundle_hash) => format!("{bundle_hash:?}"),
         //     Err(e) => format!("{e:?}"),
         // };
+        let s = Instant::now();
         let simulated = bundler
             .flashbots
             .inner()
@@ -401,7 +404,10 @@ pub fn benchmark_function(_: &mut Criterion) {
                 println!("Simulation revert: {r:?}");
             }
         }
+        let took = s.elapsed().as_millis();
+        println!("- Running simulation took: {:?} ms", took);
 
+        let s = Instant::now();
         let pending_bundle = bundler
             .flashbots
             .inner()

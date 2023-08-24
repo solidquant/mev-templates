@@ -27,5 +27,5 @@ WETH_ABI = json.load(open(ABI_PATH / 'WETH.json', 'r'))
 # compiled using Foundry
 BOT_ABI = json.load(open(ABI_PATH / 'V2ArbBot.json', 'r'))['abi']
 
-# PRIVATE_RELAY = 'https://relay.flashbots.net'
-PRIVATE_RELAY = 'https://bor.txrelay.marlin.org/'
+PRIVATE_RELAY = 'https://relay.flashbots.net'
+# PRIVATE_RELAY = 'https://bor.txrelay.marlin.org/'

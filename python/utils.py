@@ -29,9 +29,15 @@ async def reconnecting_websocket_loop(stream_fn: Callable, tag: str):
 
 
 def calculate_next_block_base_fee(block: Dict[str, Any]) -> int:
-    base_fee = int(block['baseFeePerGas'], base=16)
-    gas_used = int(block['gasUsed'], base=16)
-    gas_limit = int(block['gasLimit'], base=16)
+    try:
+        base_fee = int(block['baseFeePerGas'], base=16)
+        gas_used = int(block['gasUsed'], base=16)
+        gas_limit = int(block['gasLimit'], base=16)
+    except TypeError:
+        # used in benchmarks
+        base_fee = block['baseFeePerGas']
+        gas_used = block['gasUsed']
+        gas_limit = block['gasLimit']
 
     target_gas_used = gas_limit / 2
     target_gas_used = 1 if target_gas_used == 0 else target_gas_used
