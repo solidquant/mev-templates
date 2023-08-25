@@ -52,8 +52,10 @@ pub async fn touched_pools_event_handler(provider: Arc<Provider<Ws>>, event_send
                     match get_touched_pool_reserves(provider.clone(), block.block_number).await {
                         Ok(reserves) => {
                             let took = s.elapsed().as_millis();
+                            let now = Instant::now();
                             println!(
-                                "Block #{:?} {:?} pools touched | Took: {:?} ms",
+                                "[{:?}] Block #{:?} {:?} pools touched | Took: {:?} ms",
+                                now,
                                 block.block_number,
                                 reserves.len(),
                                 took

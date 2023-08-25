@@ -1,6 +1,7 @@
 const cliProgress = require('cli-progress');
 
 const { logger } = require('./constants');
+const { Path } = require('./bundler');
 const { UniswapV2Simulator } = require('./simulator');
 
 const range = (start, stop, step) => {
@@ -85,6 +86,19 @@ class ArbPath {
             }
         }
         return [optimizedIn, profit / (10 ** tokenInDecimals)];
+    }
+
+    toPathParams(routers) {
+        let pathParams = [];
+        for (let i = 0; i < this.nhop(); i++) {
+            let pool = this[`pool${i + 1}`];
+            let zeroForOne = this[`zeroForOne${i + 1}`];
+            let tokenIn = zeroForOne ? pool.token0 : pool.token1;
+            let tokenOut = zeroForOne ? pool.token1 : pool.token0;
+            let path = new Path(routers[i], tokenIn, tokenOut);
+            pathParams.push(path);
+        }
+        return pathParams;
     }
 }
 

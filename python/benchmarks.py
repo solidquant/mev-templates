@@ -44,7 +44,7 @@ async def logging_event_handler(event_queue: aioprocessing.AioQueue):
 
             if data['type'] == 'pending_tx':
                 now = datetime.datetime.now().timestamp() * 1000000
-                wr.writerow([data['tx_hash'], now])
+                wr.writerow([data['tx_hash'], int(now)])
         except Exception as _:
             break
         
@@ -61,7 +61,8 @@ async def touched_pools_event_handler(event_queue: aioprocessing.AioQueue):
                 block_number = data['block_number']
                 reserves = get_touched_pool_reserves(w3, block_number)
                 took = (time.time() - s) * 1000
-                print(f'Block #{block_number} {len(reserves)} pools touched | Took: {took} ms')
+                now = datetime.datetime.now()
+                print(f'[{now}] Block #{block_number} {len(reserves)} pools touched | Took: {took} ms')
         except Exception as _:
             break
             
@@ -144,10 +145,10 @@ if __name__ == '__main__':
     # #######################################
     # # 6️⃣ Pending transaction async stream #
     # #######################################
-    # stream_func = stream_pending_transactions
-    # handler_func = logging_event_handler
-    # print('6. Logging receive time for pending transaction streams. Wait 20 seconds...')
-    # asyncio.run(benchmark_streams(stream_func, handler_func, 20))
+    stream_func = stream_pending_transactions
+    handler_func = logging_event_handler
+    print('6. Logging receive time for pending transaction streams. Wait 20 seconds...')
+    asyncio.run(benchmark_streams(stream_func, handler_func, 20))
     
     # #################################################
     # # 7️⃣ Retrieving logs from a newly created block #
@@ -206,8 +207,9 @@ if __name__ == '__main__':
     ################################
     # 🔟 Sending Flashbots bundles #
     ################################
+    block = w3.eth.get_block('latest')
     next_base_fee = calculate_next_block_base_fee(block)
-    max_priority_fee_per_gas = 1  # 1 wei...
+    max_priority_fee_per_gas = 1  # 1 wei...this will never get added
     max_fee_per_gas = next_base_fee + max_priority_fee_per_gas
     
     s = time.time()
