@@ -37,6 +37,8 @@ class UniswapV2Simulator:
         amount_in_with_fee = amount_in * (1000 - fee)
         numerator = amount_in_with_fee * reserve_out
         denominator = (reserve_in * 1000) + amount_in_with_fee
+        if denominator == 0:
+            return 0
         return int(numerator / denominator)
 
     def get_amount_in(self,

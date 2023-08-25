@@ -17,52 +17,45 @@ from utils import calculate_next_block_base_fee, estimated_next_block_gas
 async def stream_new_blocks(wss_url: str,
                             event_queue: aioprocessing.AioQueue,
                             debug: bool = False,
-                            chain: str = 'ethereum'):
+                            chain: str = 'ethereum'):    
     async with websockets.connect(wss_url) as ws:
-        subscription = {
-            'json': '2.0',
-            'id': 1,
-            'method': 'eth_subscribe',
-            'params': ['newHeads']
-        }
-
-        await ws.send(json.dumps(subscription))
+        wss = Web3.WebsocketProvider(wss_url)
+        subscription = wss.encode_rpc_request('eth_subscribe', ['newHeads'])
+        
+        await ws.send(subscription)
         _ = await ws.recv()
 
-        WEI = 10 ** 18
-
         while True:
-            msg = await asyncio.wait_for(ws.recv(), timeout=60 * 10)
-            block = json.loads(msg)['params']['result']
-            block_number = int(block['number'], base=16)
-            base_fee = int(block['baseFeePerGas'], base=16)
-            next_base_fee = calculate_next_block_base_fee(block)
-            estimate_gas = await estimated_next_block_gas(chain)
-            event = {
-                'type': 'block',
-                'block_number': block_number,
-                'base_fee': base_fee,
-                'next_base_fee': next_base_fee,
-                **estimate_gas,
-            }
-            if not debug:
-                event_queue.put(event)
-            else:
-                logger.info(event)
+            try:
+                msg = await asyncio.wait_for(ws.recv(), timeout=60 * 10)
+                block = json.loads(msg)['params']['result']
+                block_number = int(block['number'], base=16)
+                base_fee = int(block['baseFeePerGas'], base=16)
+                next_base_fee = calculate_next_block_base_fee(block)
+                estimate_gas = await estimated_next_block_gas(chain)
+                event = {
+                    'type': 'block',
+                    'block_number': block_number,
+                    'base_fee': base_fee,
+                    'next_base_fee': next_base_fee,
+                    **estimate_gas,
+                }
+                if not debug:
+                    event_queue.put(event)
+                else:
+                    logger.info(event)
+            except Exception as e:
+                print(e)
 
 
 async def stream_pending_transactions(wss_url: str,
                                       event_queue: aioprocessing.AioQueue,
                                       debug: bool = False):
     async with websockets.connect(wss_url) as ws:
-        subscription = {
-            'json': '2.0',
-            'id': 1,
-            'method': 'eth_subscribe',
-            'params': ['newPendingTransactions']
-        }
-
-        await ws.send(json.dumps(subscription))
+        wss = Web3.WebsocketProvider(wss_url)
+        subscription = wss.encode_rpc_request('eth_subscribe', ['newPendingTransactions'])
+        
+        await ws.send(subscription)
         _ = await ws.recv()
 
         while True:
@@ -133,17 +126,11 @@ async def stream_uniswap_v2_events(https_url: str,
     sync_event_selector = w3.keccak(text='Sync(uint112,uint112)').hex()
 
     async with websockets.connect(wss_url) as ws:
-        subscription = {
-            'json': '2.0',
-            'id': 1,
-            'method': 'eth_subscribe',
-            'params': [
-                'logs',
-                {'topics': [sync_event_selector]}
-            ]
-        }
+        wss = Web3.WebsocketProvider(wss_url)
+        params = ['logs', {'topics': [sync_event_selector]}]
+        subscription = wss.encode_rpc_request('eth_subscribe', params)
 
-        await ws.send(json.dumps(subscription))
+        await ws.send(subscription)
         _ = await ws.recv()
 
         while True:

@@ -9,8 +9,6 @@ const uuid = require('uuid');
 
 const { BOT_ABI, PRIVATE_RELAY } = require('./constants');
 
-const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000'
-
 class Path {
     constructor(router, tokenIn, tokenOut) {
         this.router = router;
@@ -40,6 +38,8 @@ class Bundler {
         this.sender = new Wallet(privateKey, this.provider);
         this.signer = new Wallet(signingKey, this.provider);
         this.bot = new ethers.Contract(botAddress, BOT_ABI, this.provider);
+
+        (async () => await this.setup())();
     }
 
     async setup() {
@@ -54,7 +54,7 @@ class Bundler {
     async toBundle(transaction) {
         return [
             {
-                signer: self.sender,
+                signer: this.sender,
                 transaction,
             }
         ];
@@ -65,7 +65,7 @@ class Bundler {
         const replacementUuid = uuid.v4();
         const signedBundle = await this.flashbots.signBundle(bundle);
         const targetBlock = blockNumber + 1;
-        const simulation = await this.flashbots.simulate(signedBundle, targetBlock);
+        const simulation = await this.flashbots.simulate(signedBundle, blockNumber);
 
         if ('error' in simulation) {
             console.warn(`Simulation Error: ${simulation.error.message}`)
@@ -74,7 +74,7 @@ class Bundler {
             console.log(`Simulation Success: ${JSON.stringify(simulation, null, 2)}`)
         }
 
-        const bundleSubmission = await this.flashbots.sendRawBundle(signedTransactions, targetBlock, { replacementUuid });
+        const bundleSubmission = await this.flashbots.sendRawBundle(signedBundle, targetBlock, { replacementUuid });
 
         if ('error' in bundleSubmission) {
             throw new Error(bundleSubmission.error.message)
@@ -192,5 +192,4 @@ module.exports = {
     Bundler,
     Path,
     Flashloan,
-    ZERO_ADDRESS,
 };

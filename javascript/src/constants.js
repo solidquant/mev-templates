@@ -79,4 +79,6 @@ module.exports = {
 
     // flashbots
     PRIVATE_RELAY: 'https://relay.flashbots.net',
+
+    ZERO_ADDRESS: '0x0000000000000000000000000000000000000000',
 };

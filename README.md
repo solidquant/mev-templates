@@ -31,6 +31,16 @@ Most strategies share a common code base, and this repository is an attempt to i
 
 ---
 
+## Benchmarks
+
+It's always difficult to pick a programming language just right for the task, and often times, it shouldn't really matter what language you use. We should take many factors into account and decide on the one that you feel most comfortable with.
+
+Among these factors, we should consider how fast each language is - in an environment that's similar to how most people would use the language, not in a super optimized way, because we don't normally hyper-optimize our codes.
+
+For this reason, I've run few benchmarks of the three templates to see how fast each can go.
+
+---
+
 You can find more about this project in my blog post:
 
 [👉 MEV templates written in Python, Javascript, and Rust](https://medium.com/@solidquant/mev-templates-written-in-python-javascript-and-rust-ddd3d324d709)

@@ -14,7 +14,7 @@ const { generateTriangularPaths } = require('./paths');
 const { batchGetUniswapV2Reserves } = require('./multi');
 const { streamNewBlocks } = require('./streams');
 const { getTouchedPoolReserves } = require('./utils');
-const { Bundler, Path, Flashloan, ZERO_ADDRESS } = require('./bundler');
+const { Bundler } = require('./bundler');
 
 async function main() {
     const provider = new ethers.providers.JsonRpcProvider(HTTPS_URL);

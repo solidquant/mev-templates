@@ -2,6 +2,7 @@ from tqdm import tqdm
 from typing import Dict, List, Optional
 
 from pools import Pool
+from bundler import Path
 from constants import logger
 from simulator import UniswapV2Simulator
 
@@ -65,6 +66,19 @@ class ArbPath:
             else:
                 break
         return optimized_in, profit / (10 ** token_in_decimals)
+    
+    def to_path_params(self, routers: List[str]) -> List[Path]:
+        path_params = []
+        for i in range(self.nhop):
+            pool = getattr(self, f'pool_{i + 1}')
+            zero_for_one = getattr(self, f'zero_for_one_{i + 1}')
+            if zero_for_one:
+                token_in, token_out = pool.token0, pool.token1
+            else:
+                token_in, token_out = pool.token1, pool.token0
+            path = Path(routers[i], token_in, token_out)
+            path_params.append(path)
+        return path_params
     
     
 def simulate_v2_path(path: ArbPath, amount_in: int, reserves: Dict[str, Pool]) -> int:
