@@ -19,14 +19,10 @@ async def stream_new_blocks(wss_url: str,
                             debug: bool = False,
                             chain: str = 'ethereum'):    
     async with websockets.connect(wss_url) as ws:
-        subscription = {
-            'method': 'eth_subscribe',
-            'params': ['newHeads'],
-            'id': 1,
-            'json': '2.0',
-        }
-
-        await ws.send(json.dumps(subscription))
+        wss = Web3.WebsocketProvider(wss_url)
+        subscription = wss.encode_rpc_request('eth_subscribe', ['newHeads'])
+        
+        await ws.send(subscription)
         _ = await ws.recv()
 
         while True:
@@ -56,14 +52,10 @@ async def stream_pending_transactions(wss_url: str,
                                       event_queue: aioprocessing.AioQueue,
                                       debug: bool = False):
     async with websockets.connect(wss_url) as ws:
-        subscription = {
-            'method': 'eth_subscribe',
-            'params': ['newPendingTransactions'],
-            'id': 1,
-            'json': '2.0',
-        }
-
-        await ws.send(json.dumps(subscription))
+        wss = Web3.WebsocketProvider(wss_url)
+        subscription = wss.encode_rpc_request('eth_subscribe', ['newPendingTransactions'])
+        
+        await ws.send(subscription)
         _ = await ws.recv()
 
         while True:
@@ -134,17 +126,11 @@ async def stream_uniswap_v2_events(https_url: str,
     sync_event_selector = w3.keccak(text='Sync(uint112,uint112)').hex()
 
     async with websockets.connect(wss_url) as ws:
-        subscription = {
-            'json': '2.0',
-            'id': 1,
-            'method': 'eth_subscribe',
-            'params': [
-                'logs',
-                {'topics': [sync_event_selector]}
-            ]
-        }
+        wss = Web3.WebsocketProvider(wss_url)
+        params = ['logs', {'topics': [sync_event_selector]}]
+        subscription = wss.encode_rpc_request('eth_subscribe', params)
 
-        await ws.send(json.dumps(subscription))
+        await ws.send(subscription)
         _ = await ws.recv()
 
         while True:

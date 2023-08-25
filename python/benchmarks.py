@@ -145,10 +145,10 @@ if __name__ == '__main__':
     # #######################################
     # # 6️⃣ Pending transaction async stream #
     # #######################################
-    stream_func = stream_pending_transactions
-    handler_func = logging_event_handler
-    print('6. Logging receive time for pending transaction streams. Wait 20 seconds...')
-    asyncio.run(benchmark_streams(stream_func, handler_func, 20))
+    # stream_func = stream_pending_transactions
+    # handler_func = logging_event_handler
+    # print('6. Logging receive time for pending transaction streams. Wait 20 seconds...')
+    # asyncio.run(benchmark_streams(stream_func, handler_func, 20))
     
     # #################################################
     # # 7️⃣ Retrieving logs from a newly created block #
