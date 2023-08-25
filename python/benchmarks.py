@@ -231,11 +231,12 @@ if __name__ == '__main__':
     flashbots: Flashbots = bundler.w3.flashbots
     
     try:
-        flashbots.simulate(bundle, block_number)
+        simulated = flashbots.simulate(bundle, block_number)
     except Exception as e:
         print('Simulation error', e)
     took = (time.time() - s) * 1000
     print(f'- Running simulation took: {took} ms')
+    print(simulated)
         
     s = time.time()
     replacement_uuid = str(uuid4())    
