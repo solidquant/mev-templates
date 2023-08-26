@@ -39,6 +39,8 @@ Among these factors, we should consider how fast each language is - in an enviro
 
 For this reason, I've run few benchmarks of the three templates to see how fast each can go.
 
+[📊 Checkout the results from this blog post](https://medium.com/@solidquant/how-fast-is-your-mev-bot-comparing-javascript-python-rust-72376a820291)
+
 ---
 
 You can find more about this project in my blog post:
