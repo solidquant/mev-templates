@@ -223,16 +223,16 @@ pub fn benchmark_function(_: &mut Criterion) {
 
     //     // try running the stream for n seconds
     //     set.spawn(tokio::time::timeout(
-    //         std::time::Duration::from_secs(20),
+    //         std::time::Duration::from_secs(180),
     //         stream_pending_transactions(provider.clone(), event_sender.clone()),
     //     ));
 
     //     set.spawn(tokio::time::timeout(
-    //         std::time::Duration::from_secs(20),
+    //         std::time::Duration::from_secs(180),
     //         logging_event_handler(provider.clone(), event_sender.clone()),
     //     ));
 
-    //     println!("6. Logging receive time for pending transaction streams. Wait 20 seconds...");
+    //     println!("6. Logging receive time for pending transaction streams. Wait 180 seconds...");
     //     while let Some(res) = set.join_next().await {
     //         println!("Closed: {:?}", res);
     //     }
@@ -351,77 +351,83 @@ pub fn benchmark_function(_: &mut Criterion) {
     // 10. Sending Flashbots bundles
     // Going to test out a real transaction with a wallet that has some ETH: Sending ETH to myself
     let task = async {
-        let bundler = Bundler::new();
-        let block = bundler
-            .provider
-            .get_block(BlockNumber::Latest)
-            .await
-            .unwrap()
-            .unwrap();
-        let next_base_fee = U256::from(calculate_next_block_base_fee(
-            block.gas_used.as_u64(),
-            block.gas_limit.as_u64(),
-            block.base_fee_per_gas.unwrap_or_default().as_u64(),
-        ));
-        let max_priority_fee_per_gas = U256::from(1);
-        let max_fee_per_gas = next_base_fee + max_priority_fee_per_gas;
+        let mut time_took = Vec::new();
 
-        let s = Instant::now();
-        let common = bundler._common_fields().await.unwrap();
-        let to = NameOrAddress::Address(common.0);
-        let amount_in = U256::from(1) * U256::from(10).pow(U256::from(15)); // 0.001
-        let tx = Eip1559TransactionRequest {
-            to: Some(to),
-            from: Some(common.0),
-            data: Some(Bytes(bytes::Bytes::new())),
-            value: Some(amount_in),
-            chain_id: Some(common.2),
-            max_priority_fee_per_gas: Some(max_priority_fee_per_gas),
-            max_fee_per_gas: Some(max_fee_per_gas),
-            gas: Some(U256::from(30000)),
-            nonce: Some(common.1),
-            access_list: AccessList::default(),
-        };
-        let signed_tx = bundler.sign_tx(tx).await.unwrap();
-        let bundle = bundler.to_bundle(vec![signed_tx], block.number.unwrap());
-        let took = s.elapsed().as_millis();
-        println!("- Creating bundle took: {:?} ms", took);
-        // let bundle_hash = match bundler.send_bundle(bundle).await {
-        //     Ok(bundle_hash) => format!("{bundle_hash:?}"),
-        //     Err(e) => format!("{e:?}"),
-        // };
-        let s = Instant::now();
-        let simulated = bundler
-            .flashbots
-            .inner()
-            .simulate_bundle(&bundle)
-            .await
-            .unwrap();
+        for n in 0..10 {
+            let bundler = Bundler::new();
+            let block = bundler
+                .provider
+                .get_block(BlockNumber::Latest)
+                .await
+                .unwrap()
+                .unwrap();
+            let next_base_fee = U256::from(calculate_next_block_base_fee(
+                block.gas_used.as_u64(),
+                block.gas_limit.as_u64(),
+                block.base_fee_per_gas.unwrap_or_default().as_u64(),
+            ));
+            let max_priority_fee_per_gas = U256::from(1);
+            let max_fee_per_gas = next_base_fee + max_priority_fee_per_gas;
 
-        for tx in &simulated.transactions {
-            if let Some(e) = &tx.error {
-                println!("Simulation error: {e:?}");
+            let _s = Instant::now();
+            let s = Instant::now();
+            let common = bundler._common_fields().await.unwrap();
+            let to = NameOrAddress::Address(common.0);
+            let amount_in = U256::from(1) * U256::from(10).pow(U256::from(15)); // 0.001
+            let tx = Eip1559TransactionRequest {
+                to: Some(to),
+                from: Some(common.0),
+                data: Some(Bytes(bytes::Bytes::new())),
+                value: Some(amount_in),
+                chain_id: Some(common.2),
+                max_priority_fee_per_gas: Some(max_priority_fee_per_gas),
+                max_fee_per_gas: Some(max_fee_per_gas),
+                gas: Some(U256::from(30000)),
+                nonce: Some(common.1),
+                access_list: AccessList::default(),
+            };
+            let signed_tx = bundler.sign_tx(tx).await.unwrap();
+            let bundle = bundler.to_bundle(vec![signed_tx], block.number.unwrap());
+            let took = s.elapsed().as_millis();
+            println!("- Creating bundle took: {:?} ms", took);
+
+            let s = Instant::now();
+            let simulated = bundler
+                .flashbots
+                .inner()
+                .simulate_bundle(&bundle)
+                .await
+                .unwrap();
+
+            for tx in &simulated.transactions {
+                if let Some(e) = &tx.error {
+                    println!("Simulation error: {e:?}");
+                }
+                if let Some(r) = &tx.revert {
+                    println!("Simulation revert: {r:?}");
+                }
             }
-            if let Some(r) = &tx.revert {
-                println!("Simulation revert: {r:?}");
-            }
+            let took = s.elapsed().as_millis();
+            println!("- Running simulation took: {:?} ms", took);
+
+            let s = Instant::now();
+            let pending_bundle = bundler
+                .flashbots
+                .inner()
+                .send_bundle(&bundle)
+                .await
+                .unwrap();
+
+            let took = s.elapsed().as_millis();
+            let total_took = _s.elapsed().as_millis();
+            println!(
+                "10. Sending Flashbots bundle ({:?}) | Took: {:?} ms",
+                pending_bundle.bundle_hash, took
+            );
+
+            time_took.push(total_took as u128);
         }
-        let took = s.elapsed().as_millis();
-        println!("- Running simulation took: {:?} ms", took);
-
-        let s = Instant::now();
-        let pending_bundle = bundler
-            .flashbots
-            .inner()
-            .send_bundle(&bundle)
-            .await
-            .unwrap();
-
-        let took = s.elapsed().as_millis();
-        println!(
-            "10. Sending Flashbots bundle ({:?}) | Took: {:?} ms",
-            pending_bundle.bundle_hash, took
-        );
+        println!("{:?}", time_took.iter().copied().sum::<u128>());
     };
     rt.block_on(task);
 

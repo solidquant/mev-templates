@@ -29,10 +29,14 @@ function loggingEventHandler(eventEmitter) {
 
     eventEmitter.on('event', async (event) => {
         if (event.type == 'pendingTx') {
-            let tx = await provider.getTransaction(event.txHash);
-            now = microtime.now();
-            let row = [tx.hash, now].join(',') + '\n';
-            fs.appendFileSync(benchmarkFile, row, { encoding: 'utf-8' });
+            try {
+                let tx = await provider.getTransaction(event.txHash);
+                now = microtime.now();
+                let row = [tx.hash, now].join(',') + '\n';
+                fs.appendFileSync(benchmarkFile, row, { encoding: 'utf-8' });
+            } catch {
+                // pass
+            }
         }
     });
 }
@@ -73,12 +77,10 @@ async function benchmarkFunction() {
     console.log(`1. HTTP provider created | Took: ${took} microsec`);
     
     // 2. Get block info
-    for (let i = 0; i < 10; i++) {
-        s = microtime.now();
-        let block = await provider.getBlock('latest');
-        took = (microtime.now() - s) / 1000;
-        console.log(`2. New block: #${block.number} | Took: ${took} ms`);
-    }
+    s = microtime.now();
+    let block = await provider.getBlock('latest');
+    took = (microtime.now() - s) / 1000;
+    console.log(`2. New block: #${block.number} | Took: ${took} ms`);
 
     // Common variables used throughout
     const factoryAddresses = ['0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac'];
@@ -119,14 +121,14 @@ async function benchmarkFunction() {
     // 6. Pending transaction async stream
     // streamFunc = streamPendingTransactions;
     // handlerFunc = loggingEventHandler;
-    // console.log('6. Logging receive time for pending transaction streams. Wait 20 seconds...');
-    // await benchmarkStreams(streamFunc, handlerFunc, 20);
+    // console.log('6. Logging receive time for pending transaction streams. Wait 180 seconds...');
+    // await benchmarkStreams(streamFunc, handlerFunc, 180);
 
     // 7. Retrieving logs from a newly created block
     // streamFunc = streamNewBlocks;
     // handlerFunc = touchedPoolsEventHandler;
     // console.log('7. Starting touched pools with new blocks streams. Wait 300 seconds...');
-    // await benchmarkStreams(streamFunc, handlerFunc, 20);
+    // await benchmarkStreams(streamFunc, handlerFunc, 300);
 
     // 8. 3-hop path simulation
     took = paths.map(path => {
@@ -164,52 +166,60 @@ async function benchmarkFunction() {
     console.log(signedBundle);
 
     // 10. Sending Flashbots bundles
-    let block = await provider.getBlock('latest');
+    block = await provider.getBlock('latest');
     blockNumber = block.number;
     let nextBaseFee = calculateNextBlockBaseFee(block);
     maxPriorityFeePerGas = BigInt(1);
     maxFeePerGas = nextBaseFee + maxPriorityFeePerGas;
 
-    s = microtime.now();
-    let common = await bundler._common_fields();
-    amountIn = BigInt(parseInt(0.001 * 10 ** 18));
-    let tx = {
-        ...common,
-        to: bundler.sender.address,
-        from: bundler.sender.address,
-        value: amountIn,
-        data: '0x',
-        gasLimit: BigInt(30000),
-        maxFeePerGas,
-        maxPriorityFeePerGas,
-    };
-    bundle = await bundler.toBundle(tx);
-    signedBundle = await bundler.flashbots.signBundle(bundle);
-    took = (microtime.now() - s) / 1000;
-    console.log(`- Creating bundle took: ${took} ms`);
+    let time = [];
+    for (let i = 0; i < 10; i++) {
+        let _s = microtime.now();
+        s = microtime.now();
+        let common = await bundler._common_fields();
+        amountIn = BigInt(parseInt(0.001 * 10 ** 18));
+        let tx = {
+            ...common,
+            to: bundler.sender.address,
+            from: bundler.sender.address,
+            value: amountIn,
+            data: '0x',
+            gasLimit: BigInt(30000),
+            maxFeePerGas,
+            maxPriorityFeePerGas,
+        };
+        bundle = await bundler.toBundle(tx);
+        signedBundle = await bundler.flashbots.signBundle(bundle);
+        took = (microtime.now() - s) / 1000;
+        console.log(`- Creating bundle took: ${took} ms`);
+    
+        s = microtime.now();
+        const simulation = await bundler.flashbots.simulate(signedBundle, blockNumber);
+    
+        if ('error' in simulation) {
+            console.warn(`Simulation Error`);
+        } else {
+            console.log(`Simulation Success`);
+        }
+        took = (microtime.now() - s) / 1000;
+        console.log(`- Running simulation took: ${took} ms`);
+    
+        s = microtime.now();
+        const targetBlock = blockNumber + 1;
+        const replacementUuid = uuid.v4();
+        const bundleSubmission = await bundler.flashbots.sendRawBundle(signedBundle, targetBlock, { replacementUuid });
+    
+        if ('error' in bundleSubmission) {
+            console.warn('Bundle send error');
+        }
+        took = (microtime.now() - s) / 1000;
+        let totalTook = (microtime.now() - _s) / 1000;
+        console.log(`10. Sending Flashbots bundle ${bundleSubmission.bundleHash} | Took: ${took} ms`);
 
-    s = microtime.now();
-    const simulation = await bundler.flashbots.simulate(signedBundle, blockNumber);
-
-    if ('error' in simulation) {
-        console.warn(`Simulation Error: ${simulation.error.message}`)
-        return '';
-    } else {
-        console.log(`Simulation Success: ${JSON.stringify(simulation, null, 2)}`)
+        time.push(totalTook);
     }
-    took = (microtime.now() - s) / 1000;
-    console.log(`- Running simulation took: ${took} ms`);
 
-    s = microtime.now();
-    const targetBlock = blockNumber + 1;
-    const replacementUuid = uuid.v4();
-    const bundleSubmission = await bundler.flashbots.sendRawBundle(signedBundle, targetBlock, { replacementUuid });
-
-    if ('error' in bundleSubmission) {
-        throw new Error(bundleSubmission.error.message)
-    }
-    took = (microtime.now() - s) / 1000;
-    console.log(`10. Sending Flashbots bundle ${bundleSubmission.bundleHash} | Took: ${took} ms`);
+    console.log(time.reduce((x, y) => x + y, 0));
 }
 
 (async () => {

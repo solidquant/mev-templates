@@ -35,6 +35,8 @@ os.makedirs(BENCHMARK_DIR, exist_ok=True)
 
 
 async def logging_event_handler(event_queue: aioprocessing.AioQueue):
+    w3 = Web3(Web3.HTTPProvider(HTTPS_URL))
+    
     f = open(BENCHMARK_DIR / '.benchmark.csv', 'w', newline='')
     wr = csv.writer(f)
     
@@ -43,6 +45,7 @@ async def logging_event_handler(event_queue: aioprocessing.AioQueue):
             data = await event_queue.coro_get()
 
             if data['type'] == 'pending_tx':
+                _ = w3.eth.get_transaction(data['tx_hash'])
                 now = datetime.datetime.now().timestamp() * 1000000
                 wr.writerow([data['tx_hash'], int(now)])
         except Exception as _:
@@ -94,14 +97,13 @@ if __name__ == '__main__':
     took = (time.time() - s) * 1000000
     print(f'1. HTTP provider created | Took: {took} microsec')
     
-    #####################
-    # 2️⃣ Get block info #
-    #####################
-    for i in range(10):
-        s = time.time()
-        block = w3.eth.get_block('latest')
-        took = (time.time() - s) * 1000
-        print(f'2. New block: #{block["number"]} | Took: {took} ms')
+    # #####################
+    # # 2️⃣ Get block info #
+    # #####################
+    s = time.time()
+    block = w3.eth.get_block('latest')
+    took = (time.time() - s) * 1000
+    print(f'2. New block: #{block["number"]} | Took: {took} ms')
     
     # Common variables used throughout 
     factory_addresses = ['0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac']
@@ -142,21 +144,21 @@ if __name__ == '__main__':
     took = (time.time() - s) * 1000
     print(f'5. Bulk multicall result for {len(reserves)} | Took: {took} ms')
     
-    # #######################################
-    # # 6️⃣ Pending transaction async stream #
-    # #######################################
+    #######################################
+    # 6️⃣ Pending transaction async stream #
+    #######################################
     # stream_func = stream_pending_transactions
     # handler_func = logging_event_handler
-    # print('6. Logging receive time for pending transaction streams. Wait 20 seconds...')
-    # asyncio.run(benchmark_streams(stream_func, handler_func, 20))
+    # print('6. Logging receive time for pending transaction streams. Wait 180 seconds...')
+    # asyncio.run(benchmark_streams(stream_func, handler_func, 180))
     
-    # #################################################
-    # # 7️⃣ Retrieving logs from a newly created block #
-    # #################################################
+    #################################################
+    # 7️⃣ Retrieving logs from a newly created block #
+    #################################################
     # stream_func = stream_new_blocks
     # handler_func = touched_pools_event_handler
     # print('7. Starting touched pools with new blocks streams. Wait 300 seconds...')
-    # asyncio.run(benchmark_streams(stream_func, handler_func, 30))
+    # asyncio.run(benchmark_streams(stream_func, handler_func, 300))
     
     ############################
     # 8️⃣ 3-hop path simulation #
@@ -212,42 +214,50 @@ if __name__ == '__main__':
     max_priority_fee_per_gas = 1  # 1 wei...this will never get added
     max_fee_per_gas = next_base_fee + max_priority_fee_per_gas
     
-    s = time.time()
-    common = bundler._common_fields
-    amount_in = int(0.001 * 10 ** 18)
-    tx = {
-        **common,
-        'to': bundler.sender.address,
-        'from': bundler.sender.address,
-        'value': amount_in,
-        'data': '0x',
-        'gas': 30000,
-        'maxFeePerGas': max_fee_per_gas,
-        'maxPriorityFeePerGas': max_priority_fee_per_gas,
-    }
-    bundle = bundler.to_bundle(tx)
-    took = (time.time() - s) * 1000
-    print(f'- Creating bundle took: {took} ms')
-    
-    s = time.time()
-    flashbots: Flashbots = bundler.w3.flashbots
-    
-    try:
-        simulated = flashbots.simulate(bundle, block_number)
-    except Exception as e:
-        print('Simulation error', e)
-    took = (time.time() - s) * 1000
-    print(f'- Running simulation took: {took} ms')
-    print(simulated)
+    took_list = []
+    for i in range(10):
+        _s = time.time()
+        s = time.time()
+        common = bundler._common_fields
+        amount_in = int(0.001 * 10 ** 18)
+        tx = {
+            **common,
+            'to': bundler.sender.address,
+            'from': bundler.sender.address,
+            'value': amount_in,
+            'data': '0x',
+            'gas': 30000,
+            'maxFeePerGas': max_fee_per_gas,
+            'maxPriorityFeePerGas': max_priority_fee_per_gas,
+        }
+        bundle = bundler.to_bundle(tx)
+        took = (time.time() - s) * 1000
+        print(f'- Creating bundle took: {took} ms')
         
-    s = time.time()
-    replacement_uuid = str(uuid4())    
-    response: FlashbotsBundleResponse = flashbots.send_bundle(
-        bundle,
-        target_block_number=block_number + 1,
-        opts={'replacementUuid': replacement_uuid},
-    )
-    
-    took = (time.time() - s) * 1000
-    print(f'10. Sending Flashbots bundle {response.bundle_hash().hex()} | Took: {took} ms')
+        s = time.time()
+        flashbots: Flashbots = bundler.w3.flashbots
+        
+        try:
+            simulated = flashbots.simulate(bundle, block_number)
+        except Exception as e:
+            print('Simulation error', e)
+        took = (time.time() - s) * 1000
+        print(f'- Running simulation took: {took} ms')
+        # print(simulated)
+            
+        s = time.time()
+        replacement_uuid = str(uuid4())    
+        response: FlashbotsBundleResponse = flashbots.send_bundle(
+            bundle,
+            target_block_number=block_number + 1,
+            opts={'replacementUuid': replacement_uuid},
+        )
+        
+        took = (time.time() - s) * 1000
+        total_took = (time.time() - _s) * 1000
+        print(f'10. Sending Flashbots bundle {response.bundle_hash().hex()} | Took: {took} ms')
+        
+        took_list.append(total_took)
+        
+    print(sum(took_list))
     
