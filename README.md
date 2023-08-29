@@ -35,13 +35,13 @@ Most strategies share a common code base, and this repository is an attempt to i
 
 Running the templates provided here are straightforward, however, you do need to create a .env file before you can begin:
 
-- HTTPS URL: your node endpoints
-- WSS URL: your node endpoints
-- CHAIN ID: 1 if Ethereum, 137 if Polygon
-- BLOCKNATIVE TOKEN: this is for the gas estimator service from Blocknative, you can create an account there and get the API key
-- PRIVATE KEY: your real wallet key, what you have to protect with your life
-- SIGNING KEY: just a key used for Flashbots reputation/identity
-- BOT ADDRESS: the address of your bot contract (V2ArbBot)
+- **HTTPS_URL**: your node endpoints
+- **WSS_URL**: your node endpoints
+- **CHAIN_ID**: 1 if Ethereum, 137 if Polygon
+- **BLOCKNATIVE_TOKEN**: this is for the gas estimator service from Blocknative, you can create an account there and get the API key
+- **PRIVATE_KEY**: your real wallet key, what you have to protect with your life
+- **SIGNING_KEY**: just a key used for Flashbots reputation/identity
+- **BOT_ADDRESS**: the address of your bot contract (V2ArbBot)
 
 You can use the provided .env.example file and create an exact copy and name it .env (sample below):
 
