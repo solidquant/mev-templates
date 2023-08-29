@@ -1,3 +1,8 @@
+/*
+Trying out different ways of sending Flashbots bundles using Rust
+
+Writer: Nemesis313
+*/
 use anvil::{Anvil, AnvilApp};
 use ethers::prelude::*;
 use ethers_flashbots::*;
