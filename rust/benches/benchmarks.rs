@@ -35,6 +35,7 @@ pub async fn logging_event_handler(_: Arc<Provider<Ws>>, event_sender: Sender<Ev
                     let now = Local::now().timestamp_micros();
                     writer.serialize((tx.hash, now)).unwrap();
                 }
+                Event::Log(_) => {}
             },
             Err(_) => {}
         }
@@ -65,6 +66,7 @@ pub async fn touched_pools_event_handler(provider: Arc<Provider<Ws>>, event_send
                     }
                 }
                 Event::PendingTx(_) => {}
+                Event::Log(_) => {}
             },
             Err(_) => {}
         }

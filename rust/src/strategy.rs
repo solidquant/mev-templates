@@ -141,6 +141,9 @@ pub async fn event_handler(provider: Arc<Provider<Ws>>, event_sender: Sender<Eve
                 Event::PendingTx(_) => {
                     // not using pending tx
                 }
+                Event::Log(_) => {
+                    // not using logs
+                }
             },
             Err(_) => {}
         }
