@@ -31,6 +31,33 @@ Most strategies share a common code base, and this repository is an attempt to i
 
 ---
 
+## How should I use this?
+
+Running the templates provided here are straightforward, however, you do need to create a .env file before you can begin:
+
+- HTTPS URL: your node endpoints
+- WSS URL: your node endpoints
+- CHAIN ID: 1 if Ethereum, 137 if Polygon
+- BLOCKNATIVE TOKEN: this is for the gas estimator service from Blocknative, you can create an account there and get the API key
+- PRIVATE KEY: your real wallet key, what you have to protect with your life
+- SIGNING KEY: just a key used for Flashbots reputation/identity
+- BOT ADDRESS: the address of your bot contract (V2ArbBot)
+
+You can use the provided .env.example file and create an exact copy and name it .env (sample below):
+
+```
+HTTPS_URL=http://192.168.200.182:8545
+WSS_URL=ws://192.168.200.182:8546
+CHAIN_ID=137
+BLOCKNATIVE_TOKEN=<token-here>
+
+PRIVATE_KEY=0xb3e5dc08b18918cce982438a28877e440aafc01fef4c314b95d0609bf946585f
+SIGNING_KEY=0x34f55bef77aca52be9f7506da40205f8ecd7e863fd3b465a5db9950247422caf
+BOT_ADDRESS=0xEc1f2DADF368D5a20D494a2974bC19e421812017
+```
+
+---
+
 ## Benchmarks
 
 It's always difficult to pick a programming language just right for the task, and often times, it shouldn't really matter what language you use. We should take many factors into account and decide on the one that you feel most comfortable with.
