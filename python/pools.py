@@ -1,14 +1,15 @@
-import csv
-import json
 import os
-import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+import csv
+import web3
+import json
+
 from tqdm import tqdm
 from enum import Enum
 from web3 import Web3
-from typing import Dict, List, Optional
-from random import randint
 from time import sleep
+from random import randint
+from typing import Dict, List, Optional
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from constants import *  
 
@@ -50,13 +51,15 @@ class Pool:
             self.fee,
         ]
 
-def fetch_events(params, factory_address, v2_factory):
+def fetch_events(params: tuple,
+                 factory_address: str,
+                 v2_factory: web3.contract.Contract):
     sleep(randint(10, 50) / 100.0)  # Adding some jitter to avoid rate-limiting
     try:
         events = v2_factory.events.PairCreated.get_logs(fromBlock=params[0], toBlock=params[1])
         return [(factory_address, event) for event in events]
     except Exception as e:
-        print(f"Error fetching events: {e}")
+        print(f'Error fetching events: {e}')
         return []
 
 def load_cached_pools() -> Optional[Dict[str, Pool]]:
@@ -100,8 +103,6 @@ def cache_synced_pools(pool: Pool):
     wr = csv.writer(f)  
     wr.writerow(pool.cache_row())
     f.close()
-    #logger.info(f'Saved pool to: {CACHED_POOLS_FILE}')
-
 
 
 def load_all_pools_from_v2(https_url: str,
@@ -209,7 +210,7 @@ def load_all_pools_from_v2(https_url: str,
                 future = executor.submit(fetch_events, params, factory_address, v2_factory)
                 rate_limit_futures.append(future)
 
-        with tqdm(total=len(rate_limit_futures), desc="Processing events", ascii=' =', leave=True) as pbar:
+        with tqdm(total=len(rate_limit_futures), desc='Processing events', ascii=' =', leave=True) as pbar:
             for future in as_completed(rate_limit_futures):
                 for factory_address, event in future.result():
                     args = event.args
