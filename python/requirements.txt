@@ -11,3 +11,4 @@ websockets
 loguru
 python-dotenv
 eth-abi
+# run pip install --upgrade websockets after completion
