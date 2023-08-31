@@ -12,7 +12,7 @@ from time import sleep
 
 from constants import *  
 
-RATE_LIMIT = 5  # Limit to 10 requests per second
+RATE_LIMIT = 3  # Limit requests
 
 
 class DexVariant(Enum):
@@ -242,8 +242,8 @@ def load_all_pools_from_v2(https_url: str,
 
 if __name__ == '__main__':
     factory_addresses = [
-        '0xc35DADB65012eC5796536bD9864eD8773aBc74C4',
-        '0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32',
+        '0xc35DADB65012eC5796536bD9864eD8773aBc74C4', # Sushiswap v2
+        '0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32', # Uniswap V2
     ]
     factory_blocks = [
         11333218,
