@@ -3,6 +3,7 @@ use indicatif::{ProgressBar, ProgressStyle};
 use itertools::Itertools;
 use std::{collections::HashMap, time::Instant};
 
+use crate::bundler::PathParam;
 use crate::multi::Reserve;
 use crate::pools::Pool;
 use crate::simulator::UniswapV2Simulator;
@@ -26,15 +27,29 @@ impl ArbPath {
         return is_pool_1 || is_pool_2 || is_pool_3;
     }
 
+    pub fn _get_pool(&self, i: u8) -> &Pool {
+        match i {
+            0 => Some(&self.pool_1),
+            1 => Some(&self.pool_2),
+            2 => Some(&self.pool_3),
+            _ => None,
+        }
+        .unwrap()
+    }
+
+    pub fn _get_zero_for_one(&self, i: u8) -> bool {
+        match i {
+            0 => Some(self.zero_for_one_1),
+            1 => Some(self.zero_for_one_2),
+            2 => Some(self.zero_for_one_3),
+            _ => None,
+        }
+        .unwrap()
+    }
+
     pub fn should_blacklist(&self, blacklist_tokens: &Vec<H160>) -> bool {
         for i in 0..self.nhop {
-            let pool = match i {
-                0 => Some(&self.pool_1),
-                1 => Some(&self.pool_2),
-                2 => Some(&self.pool_3),
-                _ => None,
-            }
-            .unwrap();
+            let pool = self._get_pool(i);
             return blacklist_tokens.contains(&pool.token0)
                 || blacklist_tokens.contains(&pool.token1);
         }
@@ -55,20 +70,8 @@ impl ArbPath {
         let mut amount_out = amount_in * unit;
 
         for i in 0..self.nhop {
-            let pool = match i {
-                0 => Some(&self.pool_1),
-                1 => Some(&self.pool_2),
-                2 => Some(&self.pool_3),
-                _ => None,
-            }
-            .unwrap();
-            let zero_for_one = match i {
-                0 => Some(self.zero_for_one_1),
-                1 => Some(self.zero_for_one_2),
-                2 => Some(self.zero_for_one_3),
-                _ => None,
-            }
-            .unwrap();
+            let pool = self._get_pool(i);
+            let zero_for_one = self._get_zero_for_one(i);
 
             let reserve = reserves.get(&pool.address)?;
             let reserve0 = reserve.reserve0;
@@ -123,6 +126,32 @@ impl ArbPath {
         }
 
         (optimized_in, U256::from(profit))
+    }
+
+    pub fn to_path_params(&self, routers: &Vec<H160>) -> Vec<PathParam> {
+        let mut path_params = Vec::new();
+        for i in 0..self.nhop {
+            let pool = self._get_pool(i);
+            let zero_for_one = self._get_zero_for_one(i);
+
+            let token_in;
+            let token_out;
+            if zero_for_one {
+                token_in = pool.token0;
+                token_out = pool.token1;
+            } else {
+                token_in = pool.token1;
+                token_out = pool.token0;
+            }
+
+            let param = PathParam {
+                router: routers[i as usize],
+                token_in: token_in,
+                token_out: token_out,
+            };
+            path_params.push(param);
+        }
+        path_params
     }
 }
 

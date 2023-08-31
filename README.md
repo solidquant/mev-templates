@@ -31,6 +31,45 @@ Most strategies share a common code base, and this repository is an attempt to i
 
 ---
 
+## How should I use this?
+
+Running the templates provided here are straightforward, however, you do need to create a .env file before you can begin:
+
+- **HTTPS_URL**: your node endpoints
+- **WSS_URL**: your node endpoints
+- **CHAIN_ID**: 1 if Ethereum, 137 if Polygon
+- **BLOCKNATIVE_TOKEN**: this is for the gas estimator service from Blocknative, you can create an account there and get the API key
+- **PRIVATE_KEY**: your real wallet key, what you have to protect with your life
+- **SIGNING_KEY**: just a key used for Flashbots reputation/identity
+- **BOT_ADDRESS**: the address of your bot contract (V2ArbBot)
+
+You can use the provided .env.example file and create an exact copy and name it .env (sample below):
+
+```
+HTTPS_URL=http://192.168.200.182:8545
+WSS_URL=ws://192.168.200.182:8546
+CHAIN_ID=137
+BLOCKNATIVE_TOKEN=<token-here>
+
+PRIVATE_KEY=0xb3e5dc08b18918cce982438a28877e440aafc01fef4c314b95d0609bf946585f
+SIGNING_KEY=0x34f55bef77aca52be9f7506da40205f8ecd7e863fd3b465a5db9950247422caf
+BOT_ADDRESS=0xEc1f2DADF368D5a20D494a2974bC19e421812017
+```
+
+---
+
+## Benchmarks
+
+It's always difficult to pick a programming language just right for the task, and often times, it shouldn't really matter what language you use. We should take many factors into account and decide on the one that you feel most comfortable with.
+
+Among these factors, we should consider how fast each language is - in an environment that's similar to how most people would use the language, not in a super optimized way, because we don't normally hyper-optimize our codes.
+
+For this reason, I've run few benchmarks of the three templates to see how fast each can go.
+
+[📊 Checkout the results from this blog post](https://medium.com/@solidquant/how-fast-is-your-mev-bot-comparing-javascript-python-rust-72376a820291)
+
+---
+
 You can find more about this project in my blog post:
 
 [👉 MEV templates written in Python, Javascript, and Rust](https://medium.com/@solidquant/mev-templates-written-in-python-javascript-and-rust-ddd3d324d709)

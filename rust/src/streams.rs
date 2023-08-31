@@ -1,7 +1,7 @@
 use anvil::eth::fees::calculate_next_block_base_fee;
 use ethers::{
     providers::{Provider, Ws},
-    types::{Transaction, U256, U64},
+    types::{Filter, Log, Transaction, U256, U64},
 };
 use ethers_providers::Middleware;
 use std::sync::Arc;
@@ -19,6 +19,7 @@ pub struct NewBlock {
 pub enum Event {
     Block(NewBlock),
     PendingTx(Transaction),
+    Log(Log),
 }
 
 pub async fn stream_new_blocks(provider: Arc<Provider<Ws>>, event_sender: Sender<Event>) {
@@ -59,4 +60,14 @@ pub async fn stream_pending_transactions(provider: Arc<Provider<Ws>>, event_send
     }
 }
 
-pub async fn stream_uniswap_v2_events() {}
+pub async fn stream_uniswap_v2_events(provider: Arc<Provider<Ws>>, event_sender: Sender<Event>) {
+    let filter = Filter::new().event("Sync(uint112,uint112)");
+    let mut stream = provider.subscribe_logs(&filter).await.unwrap();
+
+    while let Some(result) = stream.next().await {
+        match event_sender.send(Event::Log(result)) {
+            Ok(_) => {}
+            Err(_) => {}
+        };
+    }
+}

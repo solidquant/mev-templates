@@ -18,6 +18,8 @@ function streamNewBlocks(wssUrl, eventEmitter) {
             ...estimateGas,
         });
     });
+
+    return wss;
 }
 
 function streamPendingTransactions(wssUrl, eventEmitter) {
@@ -29,6 +31,8 @@ function streamPendingTransactions(wssUrl, eventEmitter) {
             txHash,
         });
     });
+
+    return wss;
 }
 
 function streamUniswapV2Events(wssUrl, eventEmitter) {
@@ -42,6 +46,8 @@ function streamUniswapV2Events(wssUrl, eventEmitter) {
     wss.on(filter, async (event) => {
         eventEmitter.emit('event', event);
     });
+
+    return wss;
 }
 
 module.exports = {
