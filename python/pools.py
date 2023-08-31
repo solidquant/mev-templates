@@ -68,15 +68,20 @@ def load_cached_pools() -> Optional[Dict[str, Pool]]:
         return pools
 
 
-def cache_synced_pools(pools: Dict[str, Pool]):
-    f = open(CACHED_POOLS_FILE, 'w', newline='')
-    wr = csv.writer(f)
-    columns = ['address', 'version', 'token0', 'token1', 'decimals0', 'decimals1', 'fee']
-    wr.writerow(columns)
-    for _, pool in pools.items():
-        wr.writerow(pool.cache_row())
+def cache_synced_pools(pool: Pool):
+    if os.path.exists(CACHED_POOLS_FILE):
+        f = open(CACHED_POOLS_FILE, 'a', newline='')
+    else:
+        f = open(CACHED_POOLS_FILE, 'w', newline='')
+        wr = csv.writer(f)
+        columns = ['address', 'version', 'token0', 'token1', 'decimals0', 'decimals1', 'fee']
+        wr.writerow(columns)
+
+    wr = csv.writer(f)  
+    wr.writerow(pool.cache_row())
     f.close()
-    logger.info(f'Saved pools to: {CACHED_POOLS_FILE} ({len(pools)} pools)')
+    logger.info(f'Saved pool to: {CACHED_POOLS_FILE}')
+
 
 
 def load_all_pools_from_v2(https_url: str,
@@ -87,9 +92,7 @@ def load_all_pools_from_v2(https_url: str,
     This function will retrieve all PairCreated events from factory_addresses, starting from from_blocks.
     The request will be made to look at events that occur in a chunk number of blocks every call.
     """
-    pools = load_cached_pools()
-    if pools:
-        return pools
+    pools = load_cached_pools() or {}
     
     v2_factory_abi = json.load(open(ABI_PATH / 'UniswapV2Factory.json', 'r'))
     erc20_abi = json.load(open(ABI_PATH / 'ERC20.json', 'r'))
@@ -98,7 +101,6 @@ def load_all_pools_from_v2(https_url: str,
     to_block = w3.eth.get_block_number()
     
     decimals: Dict[str, int] = {}
-    pools = {}
 
     for i in range(len(factory_addresses)):
         factory_address = factory_addresses[i]
@@ -146,20 +148,21 @@ def load_all_pools_from_v2(https_url: str,
                             decimals0=decimals0,
                             decimals1=decimals1,
                             fee=300)
-                pools[args.pair] = pool
+                if args.pair not in pools:
+                    pools[args.pair] = pool
+                    cache_synced_pools(pool)
 
-    cache_synced_pools(pools)
     return pools
 
 
 if __name__ == '__main__':
     factory_addresses = [
         '0xc35DADB65012eC5796536bD9864eD8773aBc74C4',  # Sushiswap V2 (Polygon)
-        # '0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32',  # Uniswap V2 (Polygon)
+        '0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32',  # Uniswap V2 (Polygon)
     ]
     factory_blocks = [
         11333218,
-        # 11799757,
+        11799757,
     ]
 
     pools = load_all_pools_from_v2(HTTPS_URL, factory_addresses, factory_blocks, 100000)
