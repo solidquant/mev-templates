@@ -70,6 +70,12 @@ def load_cached_pools() -> Optional[Dict[str, Pool]]:
 
 def cache_synced_pools(pool: Pool):
     if os.path.exists(CACHED_POOLS_FILE):
+        f = open(CACHED_POOLS_FILE, 'r')
+        rdr = csv.reader(f)
+        existing_pools = [row[0] for row in rdr]
+        f.close()
+        if pool.address in existing_pools:
+            return
         f = open(CACHED_POOLS_FILE, 'a', newline='')
     else:
         f = open(CACHED_POOLS_FILE, 'w', newline='')
@@ -80,7 +86,7 @@ def cache_synced_pools(pool: Pool):
     wr = csv.writer(f)  
     wr.writerow(pool.cache_row())
     f.close()
-    logger.info(f'Saved pool to: {CACHED_POOLS_FILE}')
+    #logger.info(f'Saved pool to: {CACHED_POOLS_FILE}')
 
 
 
