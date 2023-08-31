@@ -174,39 +174,20 @@ def load_all_pools_from_v2(https_url: str,
 
     return pools
 
-def all_pools_cached(factory_addresses: List[str], from_blocks: List[int], cached_pools: Dict[str, Pool]) -> bool:
-    # Create a set for faster lookup.
-    factory_set = set(factory_addresses)
-    
-    # Count the occurrences of each factory address in the cached pools.
-    factory_count = {address: 0 for address in factory_set}
-    
-    for pool in cached_pools.values():
-        # Assuming your Pool class has a factory_address attribute.
-        if pool.factory_address in factory_set:
-            factory_count[pool.factory_address] += 1
-    
-    # Now check if each factory address appears at least as many times as the from_block.
-    # For simplicity, we're just checking the presence of factory addresses.
-    # Modify this according to your specific needs.
-    for factory_address, from_block in zip(factory_addresses, from_blocks):
-        if factory_count.get(factory_address, 0) == 0:
-            return False
-    
-    return True
-
 def load_all_pools_from_v2(https_url: str,
                            factory_addresses: List[str],
                            from_blocks: List[int],
                            chunk: int = 100000) -> Dict[str, Pool]:
+
+    # Load cached pools
+    pools = load_cached_pools()
     
-    pools = load_cached_pools() or {}
-    
-    # Check if all factory_addresses and their respective from_blocks are already cached.
-    if all_pools_cached(factory_addresses, from_blocks, pools):
-        print("All pools are already cached. Skipping fetching.")
+    # If cached pools exist, skip the fetching part
+    if pools is not None:
+        print("Pools already exist in cache. Skipping fetching.")
         return pools
     
+    pools = pools or {}
     v2_factory_abi = json.load(open(ABI_PATH / 'UniswapV2Factory.json', 'r'))
     erc20_abi = json.load(open(ABI_PATH / 'ERC20.json', 'r'))
     w3 = Web3(Web3.HTTPProvider(https_url))
