@@ -13,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from constants import *  
 
-RATE_LIMIT = 3  # Limit requests
+RATE_LIMIT = 10  # Limit requests, adjust this to rate limit 
 
 
 class DexVariant(Enum):
@@ -179,8 +179,16 @@ def load_all_pools_from_v2(https_url: str,
                            factory_addresses: List[str],
                            from_blocks: List[int],
                            chunk: int = 100000) -> Dict[str, Pool]:
+
+    # Load cached pools
+    pools = load_cached_pools()
     
-    pools = load_cached_pools() or {}
+    # If cached pools exist, skip the fetching part
+    if pools is not None:
+        print("Pools already exist in cache. Skipping fetching.")
+        return pools
+    
+    pools = pools or {}
     v2_factory_abi = json.load(open(ABI_PATH / 'UniswapV2Factory.json', 'r'))
     erc20_abi = json.load(open(ABI_PATH / 'ERC20.json', 'r'))
     w3 = Web3(Web3.HTTPProvider(https_url))

@@ -170,11 +170,11 @@ if __name__ == '__main__':
     
     factory_addresses = [
         '0xc35DADB65012eC5796536bD9864eD8773aBc74C4',  # Sushiswap V2 (Polygon)
-        # '0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32',  # Uniswap V2 (Polygon)
+        '0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32',  # Uniswap V2 (Polygon)
     ]
     factory_blocks = [
         11333218,
-        # 11799757,
+        11799757,
     ]
     
     pools = load_all_pools_from_v2(HTTPS_URL,
