@@ -26,9 +26,10 @@ cfmms = "0.6.2"
 ethers-flashbots = { git = "https://github.com/onbjerg/ethers-flashbots", version = "0.14.0" }
 ethers-providers = "2.0"
 ethers-core = "2.0"
-ethers-contract = { version = "2.0.3", default-features = false }
-ethers = {version = "2.0.7", features = ["abigen", "ws", "rustls"]}
+ethers-contract = { version = "2.0", default-features = false }
+ethers = {version = "2.0", features = ["abigen", "ws", "rustls"]}
 revm = "3.3.0"
+anvil = { git = "https://github.com/solidquant/foundry.git", branch = "version-fix" }
 
 # logging
 indoc = "2"
