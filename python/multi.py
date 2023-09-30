@@ -8,6 +8,7 @@ from multicall import Call, Multicall
 from pools import Pool
 from constants import logger
 
+
 def get_uniswap_v2_reserves(https_url: str, pools: Dict[str, Pool]):
     w3 = Web3(Web3.HTTPProvider(https_url))
     signature = 'getReserves()((uint112,uint112,uint32))'  # reserve0, reserve1, blockTimestampLast

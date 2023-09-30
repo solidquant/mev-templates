@@ -20,6 +20,7 @@ class DexVariant(Enum):
     UniswapV2 = 2
     UniswapV3 = 3
 
+
 class Pool:
 
     def __init__(self,
@@ -49,6 +50,7 @@ class Pool:
             self.decimals1,
             self.fee,
         ]
+        
 
 def fetch_events(params: tuple,
                  factory_address: str,
@@ -178,6 +180,7 @@ def load_all_pools_from_v2(https_url: str,
                 pbar.update(1)
 
     return pools
+
 
 if __name__ == '__main__':
     factory_addresses = [
