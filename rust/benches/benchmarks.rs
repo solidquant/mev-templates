@@ -1,4 +1,3 @@
-use anvil::eth::fees::calculate_next_block_base_fee;
 use chrono::prelude::*;
 use criterion::{criterion_group, criterion_main, Criterion};
 use ethers::{
@@ -19,7 +18,7 @@ use rust::multi::{batch_get_uniswap_v2_reserves, get_uniswap_v2_reserves};
 use rust::paths::generate_triangular_paths;
 use rust::pools::load_all_pools_from_v2;
 use rust::streams::{stream_new_blocks, stream_pending_transactions, Event};
-use rust::utils::get_touched_pool_reserves;
+use rust::utils::{calculate_next_block_base_fee, get_touched_pool_reserves};
 
 pub async fn logging_event_handler(_: Arc<Provider<Ws>>, event_sender: Sender<Event>) {
     let benchmark_file = Path::new("benches/.benchmark.csv");
@@ -364,9 +363,9 @@ pub fn benchmark_function(_: &mut Criterion) {
                 .unwrap()
                 .unwrap();
             let next_base_fee = U256::from(calculate_next_block_base_fee(
-                block.gas_used.as_u64(),
-                block.gas_limit.as_u64(),
-                block.base_fee_per_gas.unwrap_or_default().as_u64(),
+                block.gas_used,
+                block.gas_limit,
+                block.base_fee_per_gas.unwrap_or_default(),
             ));
             let max_priority_fee_per_gas = U256::from(1);
             let max_fee_per_gas = next_base_fee + max_priority_fee_per_gas;

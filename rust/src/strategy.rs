@@ -15,10 +15,14 @@ use crate::streams::Event;
 use crate::utils::get_touched_pool_reserves;
 
 pub async fn event_handler(provider: Arc<Provider<Ws>>, event_sender: Sender<Event>) {
+    /*
+    Current addresses are all from the Ethereum network.
+    Please change them according to your chain of interest.
+    */
     let env = Env::new();
 
-    let factory_addresses = vec!["0xc35DADB65012eC5796536bD9864eD8773aBc74C4"];
-    let router_addresses = vec!["0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506"];
+    let factory_addresses = vec!["0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac"];
+    let router_addresses = vec!["0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F"];
     let factory_blocks = vec![11333218u64];
 
     let pools_vec = load_all_pools_from_v2(env.wss_url.clone(), factory_addresses, factory_blocks)
@@ -27,7 +31,7 @@ pub async fn event_handler(provider: Arc<Provider<Ws>>, event_sender: Sender<Eve
     info!("Initial pool count: {}", pools_vec.len());
 
     // Performing USDC triangular arbitrage
-    let usdc_address = H160::from_str("0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174").unwrap();
+    let usdc_address = H160::from_str("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48").unwrap();
     let usdc_decimals = 6;
 
     let paths = generate_triangular_paths(&pools_vec, usdc_address);
@@ -102,16 +106,16 @@ pub async fn event_handler(provider: Arc<Provider<Ws>>, event_sender: Sender<Eve
                         }
                     }
 
-                    let wmatic_usdc_address =
-                        Address::from_str("0xcd353F79d9FADe311fC3119B841e1f456b54e858").unwrap();
-                    let pool = pools.get(&wmatic_usdc_address).unwrap();
-                    let reserve = reserves.get(&wmatic_usdc_address).unwrap();
-                    let wmatic_price = UniswapV2Simulator::reserves_to_price(
+                    let usdc_weth_address =
+                        Address::from_str("0x397FF1542f962076d0BFE58eA045FfA2d347ACa0").unwrap();
+                    let pool = pools.get(&usdc_weth_address).unwrap();
+                    let reserve = reserves.get(&usdc_weth_address).unwrap();
+                    let weth_price = UniswapV2Simulator::reserves_to_price(
                         reserve.reserve0,
                         reserve.reserve1,
                         pool.decimals0,
                         pool.decimals1,
-                        true,
+                        false,
                     );
 
                     let base_fee = block.next_base_fee;
@@ -119,7 +123,7 @@ pub async fn event_handler(provider: Arc<Provider<Ws>>, event_sender: Sender<Eve
                     let gas_cost_in_wei = base_fee * estimated_gas_usage;
                     let gas_cost_in_wmatic =
                         (gas_cost_in_wei.as_u64() as f64) / ((*WEI).as_u64() as f64);
-                    let gas_cost_in_usdc = wmatic_price * gas_cost_in_wmatic;
+                    let gas_cost_in_usdc = weth_price * gas_cost_in_wmatic;
                     let gas_cost_in_usdc =
                         U256::from((gas_cost_in_usdc * ((10 as f64).powi(usdc_decimals))) as u64);
 
