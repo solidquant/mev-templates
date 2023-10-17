@@ -183,13 +183,14 @@ def load_all_pools_from_v2(https_url: str,
 
 
 if __name__ == '__main__':
+    """
+    Example code can be run on Ethereum
+    """
     factory_addresses = [
-        '0xc35DADB65012eC5796536bD9864eD8773aBc74C4', # Sushiswap v2
-        '0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32', # Uniswap V2
+        '0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac', # Uniswap v2
     ]
     factory_blocks = [
-        11333218,
-        11799757,
+        10794229,
     ]
 
     pools = load_all_pools_from_v2(HTTPS_URL, factory_addresses, factory_blocks, 100000)

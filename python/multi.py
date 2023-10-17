@@ -70,15 +70,15 @@ if __name__ == '__main__':
 
     HTTPS_URL = os.getenv('HTTPS_URL')
 
-    # Example on Polygon
-    sushiswap_v2_factory_address = '0xc35DADB65012eC5796536bD9864eD8773aBc74C4'
-    sushiswap_v2_factory_block = 11333218
+    # Example on Ethereum
+    uniswap_v2_factory_addresses = ['0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac']
+    uniswap_v2_factory_blocks = [10794229]
 
     w3 = Web3(Web3.HTTPProvider(HTTPS_URL))
-    pools = load_all_pools_from_v2(HTTPS_URL, sushiswap_v2_factory_address, sushiswap_v2_factory_block, 50000)
+    pools = load_all_pools_from_v2(HTTPS_URL, uniswap_v2_factory_addresses, uniswap_v2_factory_blocks, 50000)
     logger.info(f'Pool count: {len(pools)}')
     
-    usdt_address = '0xc2132D05D31c914a87C6611C10748AEb04B58e8F'
+    usdt_address = '0xdAC17F958D2ee523a2206206994597C13D831ec7'
     paths = generate_triangular_paths(pools, usdt_address)
     
     # Filter pools that were used in arb paths
@@ -104,3 +104,4 @@ if __name__ == '__main__':
     e = time.time()
     logger.info(f'Took: {e - s} seconds')
     logger.info(len(reserves))
+    logger.info(reserves)

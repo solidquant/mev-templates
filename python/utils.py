@@ -141,14 +141,14 @@ if __name__ == '__main__':
     bundler = Bundler(PRIVATE_KEY, SIGNING_KEY, HTTPS_URL, BOT_ADDRESS)
     
     balancer_vault = '0xBA12222222228d8Ba445958a75a0704d566BF2C8'
-    sushiswap_v2_router = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
-    weth_address = '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619'
-    usdc_address = '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'
+    uniswap_v2_router = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
+    weth_address = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'
+    usdc_address = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
     
     GWEI = 10 ** 9
     
     paths = [
-        Path(sushiswap_v2_router, weth_address, usdc_address)    
+        Path(uniswap_v2_router, weth_address, usdc_address)    
     ]
     amount_in = Web3.to_wei(1, 'ether')
     order_tx = bundler.order_tx(paths,

@@ -23,7 +23,7 @@ pub async fn event_handler(provider: Arc<Provider<Ws>>, event_sender: Sender<Eve
 
     let factory_addresses = vec!["0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac"];
     let router_addresses = vec!["0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F"];
-    let factory_blocks = vec![11333218u64];
+    let factory_blocks = vec![10794229u64];
 
     let pools_vec = load_all_pools_from_v2(env.wss_url.clone(), factory_addresses, factory_blocks)
         .await

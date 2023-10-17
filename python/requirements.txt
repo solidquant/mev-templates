@@ -1,12 +1,12 @@
 aiohttp
 aioprocessing
 flashbots
-multicall
+multicall==0.7.7
 nest-asyncio
 numpy
 pandas
 tqdm
-web3
+web3==6.11
 websockets
 loguru
 python-dotenv

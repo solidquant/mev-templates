@@ -164,10 +164,10 @@ if __name__ == '__main__':
     HTTPS_URL = os.getenv('HTTPS_URL')
     WSS_URL = os.getenv('WSS_URL')
 
-    sushiswap_v2_factory_address = '0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac'
-    sushiswap_v2_factory_block = 10794229
+    uniswap_v2_factory_addresses = ['0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac']
+    uniswap_v2_factory_blocks = 10794229
 
-    pools = load_all_pools_from_v2(HTTPS_URL, sushiswap_v2_factory_address, sushiswap_v2_factory_block, 50000)
+    pools = load_all_pools_from_v2(HTTPS_URL, uniswap_v2_factory_addresses, uniswap_v2_factory_blocks, 50000)
 
     new_blocks_stream = reconnecting_websocket_loop(
         partial(stream_new_blocks, WSS_URL, None, True, 'ethereum'),

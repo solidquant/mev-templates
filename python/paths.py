@@ -169,12 +169,10 @@ if __name__ == '__main__':
     from pools import load_all_pools_from_v2
     
     factory_addresses = [
-        '0xc35DADB65012eC5796536bD9864eD8773aBc74C4',  # Sushiswap V2 (Polygon)
-        '0x5757371414417b8C6CAad45bAeF941aBc7d3Ab32',  # Uniswap V2 (Polygon)
+        '0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac',  # Uniswap V2 (Ethereum)
     ]
     factory_blocks = [
-        11333218,
-        11799757,
+        10794229,
     ]
     
     pools = load_all_pools_from_v2(HTTPS_URL,
@@ -182,6 +180,6 @@ if __name__ == '__main__':
                                    factory_blocks,
                                    50000)
     
-    token_in = '0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619'  # WETH
+    token_in = '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2'  # WETH
     paths = generate_triangular_paths(pools, token_in)
     # logger.info(paths)

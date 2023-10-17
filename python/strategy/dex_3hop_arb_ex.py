@@ -25,6 +25,7 @@ from constants import (
     logger,
 )
 
+# change if needed, the token below is a placeholder
 blacklist_tokens = ['0x9469603F3Efbcf17e4A5868d81C701BDbD222555']
 
 
@@ -32,10 +33,10 @@ async def event_handler(event_queue: aioprocessing.AioQueue):
     w3 = Web3(Web3.HTTPProvider(HTTPS_URL))
     
     factory_addresses = [
-        '0xc35DADB65012eC5796536bD9864eD8773aBc74C4',  # Sushiswap V2 (Polygon)
+        '0xC0AEe478e3658e2610c5F7A4A2E1777cE9e4f2Ac',  # Uniswap V2 (Ethereum)
     ]
     factory_blocks = [
-        11333218,
+        10794229,
     ]
     
     # Retrieve all Sushiswap V2 pools
@@ -47,7 +48,7 @@ async def event_handler(event_queue: aioprocessing.AioQueue):
     logger.info(f'Initial pool count: {len(pools)}')
     
     # Create triangular paths using USDT as the starting/ending token
-    usdc_address = '0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174'
+    usdc_address = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48'
     usdc_decimals = 6
     
     paths = generate_triangular_paths(pools, usdc_address)
@@ -74,9 +75,9 @@ async def event_handler(event_queue: aioprocessing.AioQueue):
         """
         Retrieves the price of WMATIC in USDC
         """
-        wmatic_usdc_address = '0xcd353F79d9FADe311fC3119B841e1f456b54e858'
-        pool = pools[wmatic_usdc_address]
-        reserve = _reserves[wmatic_usdc_address]
+        usdc_weth_address = '0x397FF1542f962076d0BFE58eA045FfA2d347ACa0'
+        pool = pools[usdc_weth_address]
+        reserve = _reserves[usdc_weth_address]
         price = sim.reserves_to_price(reserve[0],
                                       reserve[1],
                                       pool.decimals0,
@@ -127,7 +128,7 @@ async def event_handler(event_queue: aioprocessing.AioQueue):
             print(f'Spread found: {spread}. Amount in: {amount_in} / Expected profit: {expected_profit} / Gas cost: {gas_cost}')
             
             if excess_profit > 0:
-                sushiswap_v2_router = '0x1b02dA8Cb0d097eB8D57A175b88c7D8b47997506'
+                uniswap_v2_router = '0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F'
                 balancer_vault = '0xBA12222222228d8Ba445958a75a0704d566BF2C8'
                 
                 swap_paths = []
@@ -139,7 +140,7 @@ async def event_handler(event_queue: aioprocessing.AioQueue):
                         token_in, token_out = pool.token0, pool.token1
                     else:
                         token_in, token_out = pool.token1, pool.token0
-                    swap_path = Path(sushiswap_v2_router, token_in, token_out)
+                    swap_path = Path(uniswap_v2_router, token_in, token_out)
                     swap_paths.append(swap_path)
                     print(f'- {i} {token_in} --> {token_out}')
                     
