@@ -1,14 +1,19 @@
 aiohttp
 aioprocessing
 flashbots
-multicall==0.7.7
 nest-asyncio
 numpy
 pandas
 tqdm
-web3==6.11
 websockets
 loguru
 python-dotenv
 eth-abi
+
+# the below won't work
+# remove from requirements.txt and manually install
+# with the same version, or the code won't work
+web3==5.31.0
+multicall==0.7.7
+
 # run pip install --upgrade websockets after completion
