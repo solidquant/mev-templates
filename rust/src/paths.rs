@@ -176,11 +176,14 @@ pub fn generate_triangular_paths(pools: &Vec<Pool>, token_in: H160) -> Vec<ArbPa
 
         if can_trade_1 {
             let zero_for_one_1 = pool_1.token0 == token_in;
-            let token_out_1 = if zero_for_one_1 {
-                pool_1.token1
+            let (token_in_1, token_out_1) = if zero_for_one_1 {
+                (pool_1.token0, pool_1.token1)
             } else {
-                pool_1.token0
+                (pool_1.token1, pool_1.token0)
             };
+            if token_in_1 != token_in {
+                continue;
+            }
 
             for j in 0..pools.len() {
                 let pool_2 = &pools[j];
@@ -188,11 +191,14 @@ pub fn generate_triangular_paths(pools: &Vec<Pool>, token_in: H160) -> Vec<ArbPa
 
                 if can_trade_2 {
                     let zero_for_one_2 = pool_2.token0 == token_out_1;
-                    let token_out_2 = if zero_for_one_2 {
-                        pool_2.token1
+                    let (token_in_2, token_out_2) = if zero_for_one_2 {
+                        (pool_2.token0, pool_2.token1)
                     } else {
-                        pool_2.token0
+                        (pool_2.token1, pool_2.token0)
                     };
+                    if token_out_1 != token_in_2 {
+                        continue;
+                    }
 
                     for k in 0..pools.len() {
                         let pool_3 = &pools[k];
@@ -202,11 +208,14 @@ pub fn generate_triangular_paths(pools: &Vec<Pool>, token_in: H160) -> Vec<ArbPa
                         if can_trade_3 {
                             let zero_for_one_3 =
                                 (pool_3.token0 == token_out_2) || (pool_3.token1 == token_out_2);
-                            let token_out_3 = if zero_for_one_3 {
-                                pool_3.token1
+                            let (token_in_3, token_out_3) = if zero_for_one_3 {
+                                (pool_3.token0, pool_3.token1)
                             } else {
-                                pool_3.token0
+                                (pool_3.token1, pool_3.token0)
                             };
+                            if token_out_2 != token_in_3 {
+                                continue;
+                            }
 
                             if token_out_3 == token_out {
                                 let unique_pool_cnt =
@@ -231,13 +240,14 @@ pub fn generate_triangular_paths(pools: &Vec<Pool>, token_in: H160) -> Vec<ArbPa
                                 };
 
                                 paths.push(arb_path);
-                                pb.inc(1);
                             }
                         }
                     }
                 }
             }
         }
+
+        pb.inc(1);
     }
 
     pb.finish_with_message(format!(

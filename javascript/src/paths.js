@@ -124,21 +124,30 @@ function generateTriangularPaths(pools, tokenIn) {
         let canTrade1 = (pool1.token0 == tokenIn) || (pool1.token1 == tokenIn);
         if (canTrade1) {
             let zeroForOne1 = pool1.token0 == tokenIn;
-            let tokenOut1 = zeroForOne1 ? pool1.token1 : pool1.token0;
+            let [tokenIn1, tokenOut1] = zeroForOne1 ? [pool1.token0, pool1.token1] : [pool1.token1, pool1.token0];
+            if (tokenIn1 != tokenIn) {
+                continue;
+            }
 
             for (let j = 0; j < pools.length; j++) {
                 let pool2 = pools[j];
                 let canTrade2 = (pool2.token0 == tokenOut1) || (pool2.token1 == tokenOut1);
                 if (canTrade2) {
                     let zeroForOne2 = pool2.token0 == tokenOut1;
-                    let tokenOut2 = zeroForOne2 ? pool2.token1 : pool2.token0;
+                    let [tokenIn2, tokenOut2] = zeroForOne2 ? [pool2.token0, pool2.token1] : [pool2.token1, pool2.token0];
+                    if (tokenOut1 != tokenIn2) {
+                        continue;
+                    }
 
                     for (let k = 0; k < pools.length; k++) {
                         let pool3 = pools[k];
                         let canTrade3 = (pool3.token0 == tokenOut2) || (pool3.token1 == tokenOut2);
                         if (canTrade3) {
                             let zeroForOne3 = pool3.token0 == tokenOut2;
-                            let tokenOut3 = zeroForOne3 ? pool3.token1 : pool3.token0;
+                            let [tokenIn3, tokenOut3] = zeroForOne3 ? [pool3.token0, pool3.token1] : [pool3.token1, pool3.token0];
+                            if (tokenOut2 != tokenIn3) {
+                                continue;
+                            }
 
                             if (tokenOut3 == tokenIn) {
                                 let uniquePoolCnt = [...new Set([

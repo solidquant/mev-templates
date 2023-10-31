@@ -128,7 +128,9 @@ def generate_triangular_paths(pools: Dict[str, Pool], token_in: str) -> List[Arb
         can_trade_1 = (pool_1.token0 == token_in) or (pool_1.token1 == token_in)
         if can_trade_1:
             zero_for_one_1 = pool_1.token0 == token_in
-            token_out_1 = pool_1.token1 if zero_for_one_1 else pool_1.token0
+            (token_in_1, token_out_1) = (pool_1.token0, pool_1.token1) if zero_for_one_1 else (pool_1.token1, pool_1.token0)
+            if token_in_1 != token_in:
+                continue
             
             for j in range(len(pools)):
                 pool_2 = pools[j]
@@ -136,7 +138,9 @@ def generate_triangular_paths(pools: Dict[str, Pool], token_in: str) -> List[Arb
                 can_trade_2 = (pool_2.token0 == token_out_1) or (pool_2.token1 == token_out_1)
                 if can_trade_2:
                     zero_for_one_2 = pool_2.token0 == token_out_1
-                    token_out_2 = pool_2.token1 if zero_for_one_2 else pool_2.token0
+                    (token_in_2, token_out_2) = (pool_2.token0, pool_2.token1) if zero_for_one_2 else (pool_2.token1, pool_2.token0)
+                    if token_out_1 != token_in_2:
+                        continue
                     
                     for k in range(len(pools)):
                         pool_3 = pools[k]
@@ -144,7 +148,9 @@ def generate_triangular_paths(pools: Dict[str, Pool], token_in: str) -> List[Arb
                         can_trade_3 = (pool_3.token0 == token_out_2) or (pool_3.token1 == token_out_2)
                         if can_trade_3:
                             zero_for_one_3 = pool_3.token0 == token_out_2
-                            token_out_3 = pool_3.token1 if zero_for_one_3 else pool_3.token0
+                            (token_in_3, token_out_3) = (pool_3.token0, pool_3.token1) if zero_for_one_3 else (pool_3.token1, pool_3.token0)
+                            if token_out_2 != token_in_3:
+                                continue
                             
                             if token_out_3 == token_in:
                                 unique_pool_cnt = len(set(pools_in_path))
