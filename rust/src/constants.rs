@@ -59,4 +59,5 @@ pub fn get_blacklist_tokens() -> Vec<H160> {
 //     "https://rpc.payload.de",
 //     "https://rpc.lightspeedbuilder.info",
 //     "https://rpc.nfactorial.xyz",
+//     "https://rpc.lokibuilder.xyz",
 // ];
